@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan d'Évaluation Tuteur - Alternance</title>
+    <!-- Chargement de Tailwind CSS pour un style moderne et des utilitaires responsives -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuration de la police Inter et styles de conteneur */
+        html { font-family: 'Inter', sans-serif; }
+        
+        .page-container {
+            max-width: 1000px; 
+            margin: 0 auto;
+            padding: 1rem; 
+        }
+        @media (min-width: 640px) { /* sm */
+             .page-container {
+                padding: 2rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+                margin: 2rem auto;
+            }
+        }
+        
+        /* Styles pour les champs éditables */
+        [contenteditable="true"] {
+            border-bottom: 2px dashed #e0e0e0;
+            padding: 2px 4px;
+            min-width: 50px;
+            display: inline-block;
+            transition: border-bottom-color 0.2s;
+            outline: none;
+            cursor: text;
+        }
+        [contenteditable="true"]:focus {
+            border-bottom-color: #3b82f6;
+            background-color: #f0f8ff;
+        }
+
+        /* Assure que le texte passe à la ligne (word-wrap) */
+        .motivation-field {
+            white-space: pre-wrap; 
+            height: auto; 
+        }
+        
+        /* Style pour les champs vides avec texte d'indication */
+        .empty-field::before {
+            content: attr(data-placeholder);
+            color: #9ca3af; 
+            pointer-events: none; 
+        }
+        /* Cache le texte d'indication quand le champ a le focus ou n'est pas vide */
+        .empty-field:focus::before, [contenteditable="true"]:not(.empty-field)::before {
+            content: none;
+        }
+
+        /* Styles spécifiques au tableau d'évaluation */
+        .eval-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .eval-table th, .eval-table td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            font-size: 0.875rem; 
+            vertical-align: middle; 
+        }
+        .eval-table th {
+            background-color: #e0f2f7; 
+            color: #0c4a6e; 
+            text-align: center;
+            font-weight: 700;
+        }
+        .eval-table th:first-child {
+            text-align: left; 
+        }
+        
+        /* Colonnes Acquis (J) / Entre les deux (K) / Non Acquis (L) */
+        .col-eval {
+            width: 100px; 
+            text-align: center;
+            font-weight: bold;
+            transition: background-color 0.1s;
+        }
+        
+        /* Couleurs pour les scores J, K, L */
+        .col-j { background-color: #d1fae5; }
+        .col-k { background-color: #fffbeb; }
+        .col-l { background-color: #fee2e2; }
+
+        /* Case à cocher personnalisée */
+        .checkbox-cell {
+            cursor: pointer;
+            user-select: none;
+            padding: 4px; 
+        }
+        .checkbox-cell:hover {
+            opacity: 0.8;
+        }
+        .checked-x {
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+        
+        /* Couleur de la croix en fonction de la colonne */
+        .col-j .checked-x { color: #065f46; }
+        .col-k .checked-x { color: #b45309; }
+        .col-l .checked-x { color: #dc2626; }
+        
+        /* Styles pour la zone de signature */
+        .signature-box {
+            border: 2px solid #3b82f6; 
+            border-radius: 0.5rem;
+            height: 120px; 
+            background-color: #f9fafb;
+            cursor: crosshair; 
+        }
+        .signature-box canvas {
+            display: block;
+        }
+        
+        /* Conteneur des tables pour faciliter l'impression */
+        .table-container {
+            margin-bottom: 2rem;
+        }
+        
+        /* ======================================================= */
+        /* MEDIA QUERY POUR L'IMPRESSION (VERSION A4 PROPRE) */
+        /* ======================================================= */
+        @page {
+            size: A4 portrait;
+            margin: 0.5cm;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 0; background-color: white !important; }
+            .page-container { 
+                width: 100%; 
+                margin: 0; 
+                padding: 0.5cm;
+                border: none; 
+                box-shadow: none; 
+                max-width: none;
+                font-size: 10pt;
+            }
+            h1, h2 { color: #000 !important; }
+            
+            /* FORCER LA DENSITÉ POUR GAGNER DE L'ESPACE VERTICAL */
+            .table-container {
+                margin-bottom: 0.8rem !important; 
+            }
+            .eval-table th, .eval-table td {
+                border-color: #444 !important;
+                padding: 2px 4px !important; 
+                font-size: 7.5pt; 
+                line-height: 1.2;
+                vertical-align: top; 
+            }
+            .eval-table th { 
+                background-color: #eee !important; 
+                color: #000 !important;
+                font-size: 7pt !important; 
+                line-height: 1.1;
+                text-align: center;
+            }
+             .eval-table th:first-child {
+                text-align: left;
+                font-size: 7.5pt !important;
+            }
+
+            .col-j { background-color: #d4edda !important; } 
+            .col-k { background-color: #fff3cd !important; } 
+            .col-l { background-color: #f8d7da !important; } 
+            
+            /* ÉVITER LES SAUTS DE PAGE INOPPORTUNS */
+            .table-container {
+                page-break-after: avoid; 
+                page-break-inside: auto; 
+            }
+            
+            /* Optimisation des signatures */
+            .signature-zone {
+                margin-top: 0.5rem !important; 
+                padding-top: 0.5rem !important; 
+                border-top-width: 1px !important; 
+            }
+            
+            .signature-wrapper {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                gap: 0.8rem !important; 
+                margin-top: 0.5rem !important;
+            }
+            .signature-area { 
+                width: 49% !important; 
+                padding: 0;
+            }
+            .signature-box {
+                border: 1px solid #000 !important; 
+                height: 70px !important; 
+                background-color: transparent !important;
+            }
+
+            /* Nettoyage des champs éditables et suppression des placeholders */
+            [contenteditable="true"] { 
+                border-bottom: 1px solid #000 !important; 
+                background-color: transparent !important;
+                color: #000 !important;
+                min-width: 80px !important;
+                display: block;
+            }
+            .empty-field::before {
+                content: none !important; 
+            }
+            /* Assure que la motivation ne crée pas de scrollbar horizontale */
+            .motivation-field {
+                overflow: visible !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- Barre de Navigation -->
+<nav class="bg-blue-900 shadow-lg sticky top-0 z-40 no-print">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div class="relative flex items-center justify-center h-16">
+            <div class="flex space-x-4">
+                <a href="index.html" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
+                    <span class="text-xl mr-2">📅</span> Feuille de Suivi
+                </a>
+                <a href="bilan.html" class="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
+                    <span class="text-xl mr-2">📄</span> Bilan Final
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Modal d'export PDF (Explicatif) -->
+<div id="pdf-modal" class="modal fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-60 z-50" style="display: none;">
+    <div class="modal-content bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+        <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center">
+            <span class="mr-2 text-2xl">📄</span> Exporter en PDF
+        </h3>
+        <p class="mb-4 text-gray-700">
+            Pour imprimer ou enregistrer ce bilan au format PDF, cliquez sur le bouton ci-dessous, puis choisissez **"Enregistrer au format PDF"** dans les options d'impression de votre navigateur.
+        </p>
+        <button onclick="launchPrint()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+            Lancer l'impression
+        </button>
+    </div>
+</div>
+
+<div id="app" class="page-container bg-white">
+    <header class="text-center mb-6">
+        <h1 class="text-xl md:text-2xl font-extrabold text-blue-800 border-b-4 border-blue-200 pb-2">
+            BILAN D'ÉVALUATION TUTEUR - FORMATION BPJEPS
+        </h1>
+    </header>
+    
+    <!-- Bouton d'impression (Non imprimé) -->
+    <div class="no-print text-center mb-6">
+        <button onclick="openModal('pdf-modal')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
+            Imprimer / Enregistrer en PDF
+        </button>
+        <p id="message-box" class="mt-3 text-center text-sm font-medium text-red-600"></p>
+    </div>
+
+    <!-- Informations générales (Période et Stagiaire) -->
+    <div class="mb-6 p-4 border rounded-lg bg-blue-50/50 shadow-sm text-sm md:text-base">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <p>
+                <strong>PÉRIODE :</strong> 
+                <span id="period" contenteditable="true" data-field="period" data-placeholder="Ex: DU 15/09/2025 AU 31/12/2025" class="empty-field font-bold"></span>
+            </p>
+            <p>
+                <strong>STAGIAIRE :</strong> 
+                <span id="stagiaire-name" contenteditable="true" data-field="stagiaireName" data-placeholder="Nom et Prénom du stagiaire" class="empty-field font-bold"></span>
+            </p>
+        </div>
+        <p class="mt-4 text-xs italic text-gray-600 border-t pt-2">
+            Merci de mettre une croix (clic) dans les cases concernées et d'accompagner la notation d'un avis motivé dans la colonne "MOTIVATION DE L'ÉVALUATION". (Acquis=Vert, Entre les deux=Orange, Non Acquis=Rouge).
+        </p>
+    </div>
+
+    <!-- Section 1 : COMPORTEMENT GENERAL -->
+    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider">COMPORTEMENT GÉNÉRAL</h2>
+
+    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+        <table class="eval-table bg-white">
+            <thead>
+                <tr>
+                    <th class="w-1/2">CRITÈRES</th>
+                    <th class="col-eval col-j">Acquis</th>
+                    <th class="col-eval col-k">Entre les deux</th>
+                    <th class="col-eval col-l">Non Acquis</th>
+                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
+                </tr>
+            </thead>
+            <tbody id="comportement-body">
+                <!-- Les lignes d'évaluation sont ajoutées par JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 2 : COMPETENCES BPJEPS (Remplacement de l'ancienne section "Encadrement") -->
+    
+    <!-- Bloc UC1 -->
+    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
+        UC1 : ENCADRER TOUT PUBLIC DANS TOUT LIEU ET TOUTE STRUCTURE
+    </h2>
+    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+        <table class="eval-table bg-white">
+            <thead>
+                <tr>
+                    <th class="w-1/2">CRITÈRES</th>
+                    <th class="col-eval col-j">Acquis</th>
+                    <th class="col-eval col-k">Entre les deux</th>
+                    <th class="col-eval col-l">Non Acquis</th>
+                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
+                </tr>
+            </thead>
+            <tbody id="competences-uc1-body">
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Bloc UC2 -->
+    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
+        UC2 : METTRE EN ŒUVRE UN PROJET D’ANIMATION S’INSCRIVANT DANS LE PROJET DE LA STRUCTURE
+    </h2>
+    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+        <table class="eval-table bg-white">
+            <thead>
+                <tr>
+                    <th class="w-1/2">CRITÈRES</th>
+                    <th class="col-eval col-j">Acquis</th>
+                    <th class="col-eval col-k">Entre les deux</th>
+                    <th class="col-eval col-l">Non Acquis</th>
+                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
+                </tr>
+            </thead>
+            <tbody id="competences-uc2-body">
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Bloc UC3 -->
+    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
+        UC3 : CONDUIRE UNE SÉANCE, UN CYCLE D’ANIMATION OU D’APPRENTISSAGE
+    </h2>
+    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+        <table class="eval-table bg-white">
+            <thead>
+                <tr>
+                    <th class="w-1/2">CRITÈRES</th>
+                    <th class="col-eval col-j">Acquis</th>
+                    <th class="col-eval col-k">Entre les deux</th>
+                    <th class="col-eval col-l">Non Acquis</th>
+                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
+                </tr>
+            </thead>
+            <tbody id="competences-uc3-body">
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Bloc UC4 -->
+    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
+        UC4 : MOBILISER LES TECHNIQUES DE LA MENTION POUR METTRE EN ŒUVRE UNE SÉANCE
+    </h2>
+    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+        <table class="eval-table bg-white">
+            <thead>
+                <tr>
+                    <th class="w-1/2">CRITÈRES</th>
+                    <th class="col-eval col-j">Acquis</th>
+                    <th class="col-eval col-k">Entre les deux</th>
+                    <th class="col-eval col-l">Non Acquis</th>
+                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
+                </tr>
+            </thead>
+            <tbody id="competences-uc4-body">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Zones de Signature -->
+    <div class="signature-zone mt-10 pt-6 border-t-2 border-gray-400">
+        <div class="signature-wrapper flex flex-col md:flex-row justify-between gap-8 text-sm md:text-base">
+            
+            <!-- Signature Stagiaire -->
+            <div class="signature-area w-full md:w-1/2 bg-white p-4 rounded-xl shadow-lg border">
+                <p class="font-semibold mb-2 text-indigo-800">Signature du stagiaire :</p>
+                <div id="signature-stagiaire-box" class="signature-box">
+                    <canvas id="canvas-stagiaire" class="w-full h-full" data-signature-id="stagiaire"></canvas>
+                </div>
+                <button onclick="clearCanvas('canvas-stagiaire')" class="no-print text-xs text-red-500 hover:text-red-700 mt-2 font-medium transition duration-150">
+                    Effacer la signature
+                </button>
+            </div>
+            
+            <!-- Signature Tuteur -->
+            <div class="signature-area w-full md:w-1/2 bg-white p-4 rounded-xl shadow-lg border">
+                <p class="font-semibold mb-2 text-indigo-800">Signature du tuteur ou référent :</p>
+                <div id="signature-tuteur-box" class="signature-box">
+                    <canvas id="canvas-tuteur" class="w-full h-full" data-signature-id="tuteur"></canvas>
+                </div>
+                <button onclick="clearCanvas('canvas-tuteur')" class="no-print text-xs text-red-500 hover:text-red-700 mt-2 font-medium transition duration-150">
+                    Effacer la signature
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const criteria = {
+        comportement: [
+            "Ponctualité",
+            "Assiduité",
+            "Intégration dans l'équipe",
+            "Application au travail",
+            "Initiative - adaptabilité",
+        ],
+        competences: {
+            'uc1': {
+                title: "UC1 : Encadrer tout public dans tout lieu et toute structure",
+                list: [
+                    "Communiquer dans les situations de la vie professionnelle",
+                    "Prendre en compte les caractéristiques des publics dans leurs environnements dans une démarche d'éducation à la citoyenneté",
+                    "Contribuer au fonctionnement d’une structure",
+                ]
+            },
+            'uc2': {
+                title: "UC2 : Mettre en œuvre un projet d’animation s’inscrivant dans le projet de la structure",
+                list: [
+                    "Concevoir un projet d’animation",
+                    "Conduire un projet d’animation",
+                    "Évaluer un projet d’animation",
+                ]
+            },
+            'uc3': {
+                title: "UC3 : Conduire une séance, un cycle d’animation ou d’apprentissage",
+                list: [
+                    "Concevoir la séance, le cycle d’animation ou d’apprentissage",
+                    "Conduire la séance, le cycle d’animation ou d’apprentissage",
+                    "Évaluer la séance, le cycle d’animation ou d’apprentissage",
+                ]
+            },
+            'uc4': {
+                title: "UC4 : Mobiliser les techniques de la mention pour mettre en œuvre une séance",
+                list: [
+                    "Conduire une séance ou un cycle en utilisant les techniques de la mention",
+                    "Maîtriser et faire appliquer les règlements de la mention",
+                    "Garantir des conditions de pratique en sécurité",
+                ]
+            }
+        }
+    };
+    
+    const columnClasses = {
+        'J': 'col-j',
+        'K': 'col-k',
+        'L': 'col-l'
+    };
+
+    const STORAGE_KEY = 'livret_alternance_bilan_v2_data';
+    let canvasStagiaire, canvasTuteur;
+    
+    function initCanvasRefs() {
+        canvasStagiaire = document.getElementById('canvas-stagiaire');
+        canvasTuteur = document.getElementById('canvas-tuteur');
+    }
+
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+    
+    function showMessage(msg, type = 'error') {
+        const messageBox = document.getElementById('message-box');
+        messageBox.textContent = msg;
+        messageBox.classList.remove('text-red-600', 'text-green-600');
+        messageBox.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
+        
+        clearTimeout(messageBox.timeoutId);
+        messageBox.timeoutId = setTimeout(() => {
+            messageBox.textContent = '';
+        }, 3000);
+    }
+    
+    function getDataForSave() {
+        const data = {};
+        
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            const field = el.getAttribute('data-field');
+            const fieldType = el.getAttribute('data-field-type');
+
+            if (field) {
+                const content = el.textContent.trim();
+                data[field] = (!el.classList.contains('empty-field') || content !== '') ? content : '';
+            } else if (fieldType === 'motivation') {
+                const rowId = el.closest('.eval-row').getAttribute('data-uid');
+                if (!data.motivations) data.motivations = {};
+                data.motivations[rowId] = el.innerText;
+            }
+        });
+        
+        data.evaluation = {};
+        document.querySelectorAll('.eval-row').forEach(row => {
+            const uid = row.getAttribute('data-uid');
+            const checkedCell = row.querySelector('.checkbox-cell.checked');
+            data.evaluation[uid] = checkedCell ? checkedCell.getAttribute('data-score') : null;
+        });
+
+        data.signatureStagiaire = canvasStagiaire ? canvasStagiaire.toDataURL('image/png') : null;
+        data.signatureTuteur = canvasTuteur ? canvasTuteur.toDataURL('image/png') : null;
+
+        return data;
+    }
+
+    function applyDataToPage(data) {
+        if (!data) return;
+        
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            const field = el.getAttribute('data-field');
+            const fieldType = el.getAttribute('data-field-type');
+
+            if (field && data[field] !== undefined) {
+                const value = data[field] || '';
+                el.textContent = value;
+                if (value === '') {
+                    el.classList.add('empty-field');
+                } else {
+                    el.classList.remove('empty-field');
+                }
+            } else if (fieldType === 'motivation' && data.motivations) {
+                const rowId = el.closest('.eval-row').getAttribute('data-uid');
+                if (data.motivations[rowId] !== undefined) {
+                    el.innerText = data.motivations[rowId];
+                }
+            }
+        });
+        
+        if (data.evaluation) {
+            document.querySelectorAll('.eval-row').forEach(row => {
+                const uid = row.getAttribute('data-uid');
+                const savedScore = data.evaluation[uid];
+                
+                row.querySelectorAll('.checkbox-cell').forEach(cell => {
+                    cell.innerHTML = '';
+                    cell.classList.remove('checked');
+                    if (cell.getAttribute('data-score') === savedScore) {
+                        cell.classList.add('checked');
+                        cell.innerHTML = '<span class="checked-x">X</span>';
+                    }
+                });
+            });
+        }
+
+        loadSignature('canvas-stagiaire', data.signatureStagiaire);
+        loadSignature('canvas-tuteur', data.signatureTuteur);
+    }
+    
+    const debouncedSaveData = debounce(() => {
+        const data = getDataForSave();
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            showMessage("Données sauvegardées automatiquement.", 'success');
+        } catch (error) {
+            console.error("Erreur de sauvegarde localStorage:", error);
+            showMessage("Erreur: Impossible de sauvegarder les données.");
+        }
+    }, 500); 
+
+    function setupDataListener() {
+        try {
+            const storedData = localStorage.getItem(STORAGE_KEY);
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                applyDataToPage(data);
+            } else {
+                applyDataToPage({}); 
+            }
+        } catch (error) {
+            console.error("Erreur de chargement ou de parsing localStorage:", error);
+            showMessage("Erreur lors du chargement des données sauvegardées.");
+        }
+    }
+
+    function generateEvaluationTable() {
+        let comportementHtml = '';
+        criteria.comportement.forEach((crit, index) => {
+            const uid = `comp-${index}`;
+            comportementHtml += createRow(crit, uid);
+        });
+        document.getElementById('comportement-body').innerHTML = comportementHtml;
+
+        Object.keys(criteria.competences).forEach(ucKey => {
+            const uc = criteria.competences[ucKey];
+            let ucHtml = '';
+            uc.list.forEach((crit, index) => {
+                const uid = `${ucKey}-${index}`;
+                ucHtml += createRow(crit, uid);
+            });
+            const bodyId = `competences-${ucKey}-body`;
+            const bodyElement = document.getElementById(bodyId);
+            if (bodyElement) {
+                bodyElement.innerHTML = ucHtml;
+            }
+        });
+        
+        document.addEventListener('input', (e) => {
+            if (e.target.closest('[contenteditable="true"]')) {
+                const fieldType = e.target.getAttribute('data-field-type');
+                const field = e.target.getAttribute('data-field');
+                
+                if (field || fieldType === 'motivation') {
+                    if (e.target.textContent.trim() === '') {
+                         e.target.classList.add('empty-field');
+                    } else {
+                         e.target.classList.remove('empty-field');
+                    }
+                }
+                
+                debouncedSaveData();
+            }
+        });
+    }
+
+    function createRow(criteriaText, uid) {
+        return `
+            <tr class="eval-row hover:bg-gray-50" data-uid="${uid}">
+                <td class="criteria-text">${criteriaText}</td>
+                <td class="col-eval checkbox-cell ${columnClasses.J}" data-score="J" onclick="toggleScore(this)"></td>
+                <td class="col-eval checkbox-cell ${columnClasses.K}" data-score="K" onclick="toggleScore(this)"></td>
+                <td class="col-eval checkbox-cell ${columnClasses.L}" data-score="L" onclick="toggleScore(this)"></td>
+                <td>
+                    <div contenteditable="true" data-field-type="motivation" class="w-full min-h-[30px] text-gray-700 text-xs p-1 motivation-field" data-placeholder="Avis du tuteur ici"></div>
+                </td>
+            </tr>
+        `;
+    }
+
+    window.toggleScore = function(clickedCell) {
+        const row = clickedCell.closest('.eval-row');
+        if (!row) return;
+
+        if (clickedCell.classList.contains('checked')) {
+            clickedCell.classList.remove('checked');
+            clickedCell.innerHTML = '';
+        } else {
+            row.querySelectorAll('.checkbox-cell').forEach(cell => {
+                cell.classList.remove('checked');
+                cell.innerHTML = '';
+            });
+            clickedCell.classList.add('checked');
+            clickedCell.innerHTML = '<span class="checked-x">X</span>';
+        }
+        debouncedSaveData();
+    }
+    
+    function loadSignature(canvasId, base64Image) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const box = canvas.parentElement;
+        
+        canvas.width = box.clientWidth;
+        canvas.height = box.clientHeight;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000000';
+        
+        if (!base64Image) return;
+
+        const img = new Image();
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = base64Image;
+    }
+
+    window.clearCanvas = function(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            debouncedSaveData(); 
+        }
+    }
+
+    function setupSignaturePads() {
+        initCanvasRefs(); 
+        [canvasStagiaire, canvasTuteur].forEach(canvas => {
+            if (!canvas) return;
+
+            const box = canvas.parentElement;
+            const ctx = canvas.getContext('2d');
+
+            function setCanvasDimensionsAndStyle() {
+                canvas.width = box.clientWidth;
+                canvas.height = box.clientHeight;
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000000';
+                if (canvas.getAttribute('data-signature-dataurl')) {
+                    loadSignature(canvas.id, canvas.getAttribute('data-signature-dataurl'));
+                }
+            }
+            
+            setCanvasDimensionsAndStyle(); 
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                let clientX, clientY;
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                const currentX = clientX - rect.left;
+                const currentY = clientY - rect.top;
+
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+
+                [lastX, lastY] = [currentX, currentY];
+            }
+
+            const startDrawing = (e) => {
+                isDrawing = true;
+                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const rect = canvas.getBoundingClientRect();
+                [lastX, lastY] = [clientX - rect.left, clientY - rect.top];
+                e.preventDefault(); 
+            };
+            const stopDrawing = () => {
+                if (isDrawing) {
+                    isDrawing = false;
+                    canvas.setAttribute('data-signature-dataurl', canvas.toDataURL('image/png'));
+                    debouncedSaveData(); 
+                }
+            };
+            
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
+
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            window.addEventListener('resize', debounce(() => {
+                const currentDataUrl = canvas.toDataURL('image/png');
+                setCanvasDimensionsAndStyle();
+                loadSignature(canvas.id, currentDataUrl);
+                canvas.setAttribute('data-signature-dataurl', currentDataUrl);
+            }, 300));
+        });
+    }
+
+    window.openModal = function(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(id);
+            }
+        });
+    }
+
+    window.closeModal = function(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    window.launchPrint = function() {
+        closeModal('pdf-modal');
+        setTimeout(() => {
+            window.print(); 
+        }, 100);
+    }
+    
+    function initApp() {
+        initCanvasRefs();
+        generateEvaluationTable(); 
+        setupSignaturePads();
+        
+        document.querySelectorAll('[data-field]').forEach(el => {
+            if (el.textContent.trim() === '') {
+                el.classList.add('empty-field');
+            }
+
+            el.addEventListener('focus', (e) => {
+                e.target.classList.remove('empty-field');
+            });
+            
+            el.addEventListener('blur', (e) => {
+                if (e.target.textContent.trim() === '') {
+                    e.target.classList.add('empty-field');
+                }
+                debouncedSaveData();
+            });
+            
+            el.addEventListener('input', debouncedSaveData); 
+        });
+        
+        setupDataListener(); 
+    }
+
+    window.onload = initApp;
+</script>
+</body>
+</html>
