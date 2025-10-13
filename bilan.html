@@ -126,6 +126,30 @@
         .table-container {
             margin-bottom: 2rem;
         }
+
+        /* Style des Modals */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
         
         /* ======================================================= */
         /* MEDIA QUERY POUR L'IMPRESSION (VERSION A4 PROPRE) */
@@ -237,14 +261,17 @@
                 <a href="bilan.html" class="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
                     <span class="text-xl mr-2">📄</span> Bilan Final
                 </a>
+                <a href="#" onclick="openModal('tuto-modal')" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
+                    <span class="text-xl mr-2">💡</span> Tutoriel
+                </a>
             </div>
         </div>
     </div>
 </nav>
 
 <!-- Modal d'export PDF (Explicatif) -->
-<div id="pdf-modal" class="modal fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-60 z-50" style="display: none;">
-    <div class="modal-content bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+<div id="pdf-modal" class="modal" style="display: none;">
+    <div class="modal-content">
         <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center">
             <span class="mr-2 text-2xl">📄</span> Exporter en PDF
         </h3>
@@ -257,6 +284,41 @@
     </div>
 </div>
 
+<!-- Modal Tutoriel -->
+<div id="tuto-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
+            <span class="mr-2 text-2xl">💡</span> Guide d'utilisation
+        </h3>
+        
+        <div class="text-left space-y-4 text-gray-800">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <p class="font-bold">Attention : Sauvegarde Locale Uniquement</p>
+                <p>Toutes les données que vous saisissez sont sauvegardées **uniquement sur votre ordinateur et dans le navigateur que vous utilisez actuellement**. Si vous changez d'appareil ou nettoyez les données de votre navigateur, les informations seront perdues.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg">Exporter toutes vos données :</h4>
+                <p>Utilisez le bouton <strong class="text-blue-600">"Exporter TOUT (JSON)"</strong> pour créer un fichier de sauvegarde unique contenant les informations de la feuille de suivi (tous les mois) et du bilan. Il est conseillé de faire des sauvegardes régulièrement.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg">Importer des données :</h4>
+                <p>Si vous changez d'ordinateur ou si vous voulez récupérer une sauvegarde, cliquez sur <strong class="text-yellow-600">"Importer (JSON)"</strong> et sélectionnez le fichier `.json` que vous aviez précédemment exporté. Toutes vos données seront restaurées.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg">Envoyer votre sauvegarde par e-mail :</h4>
+                <p>Après avoir exporté vos données, vous obtiendrez un fichier (ex: `sauvegarde-livret.json`). Vous pouvez simplement joindre ce fichier à un e-mail comme n'importe quelle autre pièce jointe pour le partager ou le conserver.</p>
+            </div>
+        </div>
+
+        <button onclick="closeModal('tuto-modal')" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 w-full">
+            J'ai compris
+        </button>
+    </div>
+</div>
+
 <div id="app" class="page-container bg-white">
     <header class="text-center mb-6">
         <h1 class="text-xl md:text-2xl font-extrabold text-blue-800 border-b-4 border-blue-200 pb-2">
@@ -264,12 +326,19 @@
         </h1>
     </header>
     
-    <!-- Bouton d'impression (Non imprimé) -->
-    <div class="no-print text-center mb-6">
-        <button onclick="openModal('pdf-modal')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
-            Imprimer / Enregistrer en PDF
+    <!-- Boutons d'action -->
+    <div class="no-print text-center mb-6 flex flex-wrap items-center justify-center gap-4">
+        <button onclick="openModal('pdf-modal')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
+            PDF (Bilan Seul)
         </button>
-        <p id="message-box" class="mt-3 text-center text-sm font-medium text-red-600"></p>
+        <button onclick="exportAllData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
+            ⬇️ Exporter TOUT (JSON)
+        </button>
+        <button onclick="document.getElementById('import-file').click()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
+            ⬆️ Importer (JSON)
+        </button>
+        <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display: none;">
+        <p id="message-box" class="w-full mt-2 text-center text-sm font-medium text-red-600"></p>
     </div>
 
     <!-- Informations générales (Période et Stagiaire) -->
@@ -291,7 +360,6 @@
 
     <!-- Section 1 : COMPORTEMENT GENERAL -->
     <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider">COMPORTEMENT GÉNÉRAL</h2>
-
     <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
         <table class="eval-table bg-white">
             <thead>
@@ -308,16 +376,14 @@
             </tbody>
         </table>
     </div>
-
-    <!-- Section 2 : COMPETENCES BPJEPS (Remplacement de l'ancienne section "Encadrement") -->
     
-    <!-- Bloc UC1 -->
+    <!-- Section 2 : COMPETENCES BPJEPS -->
     <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
         UC1 : ENCADRER TOUT PUBLIC DANS TOUT LIEU ET TOUTE STRUCTURE
     </h2>
     <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
         <table class="eval-table bg-white">
-            <thead>
+             <thead>
                 <tr>
                     <th class="w-1/2">CRITÈRES</th>
                     <th class="col-eval col-j">Acquis</th>
@@ -330,14 +396,12 @@
             </tbody>
         </table>
     </div>
-    
-    <!-- Bloc UC2 -->
     <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
         UC2 : METTRE EN ŒUVRE UN PROJET D’ANIMATION S’INSCRIVANT DANS LE PROJET DE LA STRUCTURE
     </h2>
     <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
         <table class="eval-table bg-white">
-            <thead>
+             <thead>
                 <tr>
                     <th class="w-1/2">CRITÈRES</th>
                     <th class="col-eval col-j">Acquis</th>
@@ -350,14 +414,12 @@
             </tbody>
         </table>
     </div>
-    
-    <!-- Bloc UC3 -->
     <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
         UC3 : CONDUIRE UNE SÉANCE, UN CYCLE D’ANIMATION OU D’APPRENTISSAGE
     </h2>
     <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
         <table class="eval-table bg-white">
-            <thead>
+             <thead>
                 <tr>
                     <th class="w-1/2">CRITÈRES</th>
                     <th class="col-eval col-j">Acquis</th>
@@ -370,8 +432,6 @@
             </tbody>
         </table>
     </div>
-    
-    <!-- Bloc UC4 -->
     <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
         UC4 : MOBILISER LES TECHNIQUES DE LA MENTION POUR METTRE EN ŒUVRE UNE SÉANCE
     </h2>
@@ -391,11 +451,34 @@
         </table>
     </div>
 
+    <!-- Section 3 : ACTIVITÉS ET PUBLICS -->
+    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">ACTIVITÉS PHARES ET PUBLICS ENCADRÉS</h2>
+    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+        <table class="eval-table bg-white">
+            <thead>
+                <tr>
+                    <th class="w-1/3">ACTIVITÉS TYPES</th>
+                    <th colspan="6">PUBLICS</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th class="text-xs font-semibold">Jeunes enfants</th>
+                    <th class="text-xs font-semibold">Enfants</th>
+                    <th class="text-xs font-semibold">Préados et ados</th>
+                    <th class="text-xs font-semibold">Adultes</th>
+                    <th class="text-xs font-semibold">Seniors</th>
+                    <th class="text-xs font-semibold">Situation handicap</th>
+                </tr>
+            </thead>
+            <tbody id="activites-table-body">
+                <!-- Lignes générées par JS -->
+            </tbody>
+        </table>
+    </div>
+
     <!-- Zones de Signature -->
     <div class="signature-zone mt-10 pt-6 border-t-2 border-gray-400">
         <div class="signature-wrapper flex flex-col md:flex-row justify-between gap-8 text-sm md:text-base">
-            
-            <!-- Signature Stagiaire -->
             <div class="signature-area w-full md:w-1/2 bg-white p-4 rounded-xl shadow-lg border">
                 <p class="font-semibold mb-2 text-indigo-800">Signature du stagiaire :</p>
                 <div id="signature-stagiaire-box" class="signature-box">
@@ -405,8 +488,6 @@
                     Effacer la signature
                 </button>
             </div>
-            
-            <!-- Signature Tuteur -->
             <div class="signature-area w-full md:w-1/2 bg-white p-4 rounded-xl shadow-lg border">
                 <p class="font-semibold mb-2 text-indigo-800">Signature du tuteur ou référent :</p>
                 <div id="signature-tuteur-box" class="signature-box">
@@ -423,55 +504,20 @@
 <script type="text/javascript">
     const criteria = {
         comportement: [
-            "Ponctualité",
-            "Assiduité",
-            "Intégration dans l'équipe",
-            "Application au travail",
-            "Initiative - adaptabilité",
+            "Ponctualité", "Assiduité", "Intégration dans l'équipe", "Application au travail", "Initiative - adaptabilité",
         ],
         competences: {
-            'uc1': {
-                title: "UC1 : Encadrer tout public dans tout lieu et toute structure",
-                list: [
-                    "Communiquer dans les situations de la vie professionnelle",
-                    "Prendre en compte les caractéristiques des publics dans leurs environnements dans une démarche d'éducation à la citoyenneté",
-                    "Contribuer au fonctionnement d’une structure",
-                ]
-            },
-            'uc2': {
-                title: "UC2 : Mettre en œuvre un projet d’animation s’inscrivant dans le projet de la structure",
-                list: [
-                    "Concevoir un projet d’animation",
-                    "Conduire un projet d’animation",
-                    "Évaluer un projet d’animation",
-                ]
-            },
-            'uc3': {
-                title: "UC3 : Conduire une séance, un cycle d’animation ou d’apprentissage",
-                list: [
-                    "Concevoir la séance, le cycle d’animation ou d’apprentissage",
-                    "Conduire la séance, le cycle d’animation ou d’apprentissage",
-                    "Évaluer la séance, le cycle d’animation ou d’apprentissage",
-                ]
-            },
-            'uc4': {
-                title: "UC4 : Mobiliser les techniques de la mention pour mettre en œuvre une séance",
-                list: [
-                    "Conduire une séance ou un cycle en utilisant les techniques de la mention",
-                    "Maîtriser et faire appliquer les règlements de la mention",
-                    "Garantir des conditions de pratique en sécurité",
-                ]
-            }
+            'uc1': { list: ["Communiquer dans les situations de la vie professionnelle", "Prendre en compte les caractéristiques des publics dans leurs environnements dans une démarche d'éducation à la citoyenneté", "Contribuer au fonctionnement d’une structure"] },
+            'uc2': { list: ["Concevoir un projet d’animation", "Conduire un projet d’animation", "Évaluer un projet d’animation"] },
+            'uc3': { list: ["Concevoir la séance, le cycle d’animation ou d’apprentissage", "Conduire la séance, le cycle d’animation ou d’apprentissage", "Évaluer la séance, le cycle d’animation ou d’apprentissage"] },
+            'uc4': { list: ["Conduire une séance ou un cycle en utilisant les techniques de la mention", "Maîtriser et faire appliquer les règlements de la mention", "Garantir des conditions de pratique en sécurité"] }
         }
     };
-    
-    const columnClasses = {
-        'J': 'col-j',
-        'K': 'col-k',
-        'L': 'col-l'
-    };
+    const columnClasses = { 'J': 'col-j', 'K': 'col-k', 'L': 'col-l' };
+    const publics = ["jeunes_enfants", "enfants", "preados_ados", "adultes", "seniors", "handicap"];
 
-    const STORAGE_KEY = 'livret_alternance_bilan_v2_data';
+    const STORAGE_KEY_BILAN = 'livret_alternance_bilan_v2_data';
+    const STORAGE_KEY_ACTIVITES = 'livret_alternance_activites_data';
     let canvasStagiaire, canvasTuteur;
     
     function initCanvasRefs() {
@@ -481,365 +527,300 @@
 
     function debounce(func, delay) {
         let timeoutId;
-        return function(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func.apply(this, args), delay);
-        };
+        return (...args) => { clearTimeout(timeoutId); timeoutId = setTimeout(() => func.apply(this, args), delay); };
     }
     
     function showMessage(msg, type = 'error') {
         const messageBox = document.getElementById('message-box');
         messageBox.textContent = msg;
-        messageBox.classList.remove('text-red-600', 'text-green-600');
+        messageBox.className = 'w-full mt-2 text-center text-sm font-medium ';
         messageBox.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
-        
         clearTimeout(messageBox.timeoutId);
-        messageBox.timeoutId = setTimeout(() => {
-            messageBox.textContent = '';
-        }, 3000);
+        messageBox.timeoutId = setTimeout(() => { messageBox.textContent = ''; }, 4000);
     }
     
+    // --- GESTION DES DONNÉES DU BILAN ---
     function getDataForSave() {
-        const data = {};
-        
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+        const data = { motivations: {}, evaluation: {} };
+        document.querySelectorAll('[contenteditable="true"][data-field]').forEach(el => {
             const field = el.getAttribute('data-field');
-            const fieldType = el.getAttribute('data-field-type');
-
-            if (field) {
-                const content = el.textContent.trim();
-                data[field] = (!el.classList.contains('empty-field') || content !== '') ? content : '';
-            } else if (fieldType === 'motivation') {
-                const rowId = el.closest('.eval-row').getAttribute('data-uid');
-                if (!data.motivations) data.motivations = {};
-                data.motivations[rowId] = el.innerText;
-            }
+            const content = el.textContent.trim();
+            data[field] = (!el.classList.contains('empty-field') || content !== '') ? content : '';
         });
-        
-        data.evaluation = {};
         document.querySelectorAll('.eval-row').forEach(row => {
             const uid = row.getAttribute('data-uid');
+            const motivationEl = row.querySelector('[data-field-type="motivation"]');
+            if (motivationEl) data.motivations[uid] = motivationEl.innerText;
             const checkedCell = row.querySelector('.checkbox-cell.checked');
             data.evaluation[uid] = checkedCell ? checkedCell.getAttribute('data-score') : null;
         });
-
         data.signatureStagiaire = canvasStagiaire ? canvasStagiaire.toDataURL('image/png') : null;
         data.signatureTuteur = canvasTuteur ? canvasTuteur.toDataURL('image/png') : null;
-
         return data;
     }
 
     function applyDataToPage(data) {
         if (!data) return;
-        
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+        document.querySelectorAll('[contenteditable="true"][data-field]').forEach(el => {
             const field = el.getAttribute('data-field');
-            const fieldType = el.getAttribute('data-field-type');
-
-            if (field && data[field] !== undefined) {
-                const value = data[field] || '';
-                el.textContent = value;
-                if (value === '') {
-                    el.classList.add('empty-field');
-                } else {
-                    el.classList.remove('empty-field');
-                }
-            } else if (fieldType === 'motivation' && data.motivations) {
-                const rowId = el.closest('.eval-row').getAttribute('data-uid');
-                if (data.motivations[rowId] !== undefined) {
-                    el.innerText = data.motivations[rowId];
-                }
+            if (data[field] !== undefined) {
+                el.textContent = data[field] || '';
+                el.classList.toggle('empty-field', !data[field]);
             }
         });
-        
-        if (data.evaluation) {
-            document.querySelectorAll('.eval-row').forEach(row => {
-                const uid = row.getAttribute('data-uid');
+        document.querySelectorAll('.eval-row').forEach(row => {
+            const uid = row.getAttribute('data-uid');
+            if (data.motivations && data.motivations[uid] !== undefined) {
+                row.querySelector('[data-field-type="motivation"]').innerText = data.motivations[uid];
+            }
+            if (data.evaluation) {
                 const savedScore = data.evaluation[uid];
-                
                 row.querySelectorAll('.checkbox-cell').forEach(cell => {
-                    cell.innerHTML = '';
-                    cell.classList.remove('checked');
-                    if (cell.getAttribute('data-score') === savedScore) {
-                        cell.classList.add('checked');
-                        cell.innerHTML = '<span class="checked-x">X</span>';
-                    }
+                    const isChecked = cell.getAttribute('data-score') === savedScore;
+                    cell.classList.toggle('checked', isChecked);
+                    cell.innerHTML = isChecked ? '<span class="checked-x">X</span>' : '';
                 });
-            });
-        }
-
+            }
+        });
         loadSignature('canvas-stagiaire', data.signatureStagiaire);
         loadSignature('canvas-tuteur', data.signatureTuteur);
     }
     
     const debouncedSaveData = debounce(() => {
-        const data = getDataForSave();
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            showMessage("Données sauvegardées automatiquement.", 'success');
-        } catch (error) {
-            console.error("Erreur de sauvegarde localStorage:", error);
-            showMessage("Erreur: Impossible de sauvegarder les données.");
-        }
+            localStorage.setItem(STORAGE_KEY_BILAN, JSON.stringify(getDataForSave()));
+            showMessage("Données du bilan sauvegardées.", 'success');
+        } catch (error) { showMessage("Erreur de sauvegarde du bilan."); }
     }, 500); 
 
-    function setupDataListener() {
-        try {
-            const storedData = localStorage.getItem(STORAGE_KEY);
-            if (storedData) {
-                const data = JSON.parse(storedData);
-                applyDataToPage(data);
-            } else {
-                applyDataToPage({}); 
-            }
-        } catch (error) {
-            console.error("Erreur de chargement ou de parsing localStorage:", error);
-            showMessage("Erreur lors du chargement des données sauvegardées.");
-        }
-    }
-
-    function generateEvaluationTable() {
-        let comportementHtml = '';
-        criteria.comportement.forEach((crit, index) => {
-            const uid = `comp-${index}`;
-            comportementHtml += createRow(crit, uid);
-        });
-        document.getElementById('comportement-body').innerHTML = comportementHtml;
-
-        Object.keys(criteria.competences).forEach(ucKey => {
-            const uc = criteria.competences[ucKey];
-            let ucHtml = '';
-            uc.list.forEach((crit, index) => {
-                const uid = `${ucKey}-${index}`;
-                ucHtml += createRow(crit, uid);
-            });
-            const bodyId = `competences-${ucKey}-body`;
-            const bodyElement = document.getElementById(bodyId);
-            if (bodyElement) {
-                bodyElement.innerHTML = ucHtml;
-            }
-        });
-        
-        document.addEventListener('input', (e) => {
-            if (e.target.closest('[contenteditable="true"]')) {
-                const fieldType = e.target.getAttribute('data-field-type');
-                const field = e.target.getAttribute('data-field');
-                
-                if (field || fieldType === 'motivation') {
-                    if (e.target.textContent.trim() === '') {
-                         e.target.classList.add('empty-field');
-                    } else {
-                         e.target.classList.remove('empty-field');
-                    }
+    // --- GESTION DES DONNÉES DES ACTIVITÉS ---
+    function getActivitesDataForSave() {
+        const data = [];
+        document.querySelectorAll('#activites-table-body tr').forEach(row => {
+            const rowIndex = row.getAttribute('data-row-index');
+            const activityText = row.querySelector(`[data-field="activity-text"]`).textContent.trim();
+            const checkedPublics = [];
+            publics.forEach(p => {
+                const cell = row.querySelector(`.public-cell[data-public="${p}"]`);
+                if (cell && cell.classList.contains('checked')) {
+                    checkedPublics.push(p);
                 }
-                
-                debouncedSaveData();
-            }
+            });
+            data.push({ activity: activityText, publics: checkedPublics });
+        });
+        return data;
+    }
+
+    function applyActivitesDataToPage(data) {
+        if (!data || !Array.isArray(data)) return;
+        document.querySelectorAll('#activites-table-body tr').forEach((row, index) => {
+            const rowData = data[index];
+            if (!rowData) return;
+            row.querySelector(`[data-field="activity-text"]`).textContent = rowData.activity || '';
+            publics.forEach(p => {
+                const cell = row.querySelector(`.public-cell[data-public="${p}"]`);
+                const isChecked = rowData.publics && rowData.publics.includes(p);
+                cell.classList.toggle('checked', isChecked);
+                cell.innerHTML = isChecked ? '<span class="checked-x">X</span>' : '';
+                cell.closest('td').style.backgroundColor = isChecked ? '#d1fae5' : '';
+            });
         });
     }
 
-    function createRow(criteriaText, uid) {
-        return `
+    const debouncedSaveActivites = debounce(() => {
+        try {
+            localStorage.setItem(STORAGE_KEY_ACTIVITES, JSON.stringify(getActivitesDataForSave()));
+            showMessage("Données des activités sauvegardées.", 'success');
+        } catch (error) { showMessage("Erreur de sauvegarde des activités."); }
+    }, 500);
+
+    // --- GÉNÉRATION DES TABLEAUX ---
+    function generateEvaluationTable() {
+        const createRow = (text, uid) => `
             <tr class="eval-row hover:bg-gray-50" data-uid="${uid}">
-                <td class="criteria-text">${criteriaText}</td>
+                <td class="criteria-text">${text}</td>
                 <td class="col-eval checkbox-cell ${columnClasses.J}" data-score="J" onclick="toggleScore(this)"></td>
                 <td class="col-eval checkbox-cell ${columnClasses.K}" data-score="K" onclick="toggleScore(this)"></td>
                 <td class="col-eval checkbox-cell ${columnClasses.L}" data-score="L" onclick="toggleScore(this)"></td>
-                <td>
-                    <div contenteditable="true" data-field-type="motivation" class="w-full min-h-[30px] text-gray-700 text-xs p-1 motivation-field" data-placeholder="Avis du tuteur ici"></div>
-                </td>
-            </tr>
-        `;
+                <td><div contenteditable="true" data-field-type="motivation" class="w-full min-h-[30px] text-gray-700 text-xs p-1 motivation-field" data-placeholder="Avis du tuteur ici"></div></td>
+            </tr>`;
+        
+        document.getElementById('comportement-body').innerHTML = criteria.comportement.map((crit, i) => createRow(crit, `comp-${i}`)).join('');
+        Object.keys(criteria.competences).forEach(ucKey => {
+            const uc = criteria.competences[ucKey];
+            document.getElementById(`competences-${ucKey}-body`).innerHTML = uc.list.map((crit, i) => createRow(crit, `${ucKey}-${i}`)).join('');
+        });
+    }
+    
+    function generateActivitesTable() {
+        const tableBody = document.getElementById('activites-table-body');
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+            html += `<tr data-row-index="${i}">
+                <td><div contenteditable="true" data-field="activity-text" data-placeholder="Décrire l'activité..." class="w-full p-1 empty-field"></div></td>
+                ${publics.map(p => `<td class="text-center"><div class="public-cell checkbox-cell" data-public="${p}" onclick="togglePublic(this)"></div></td>`).join('')}
+            </tr>`;
+        }
+        tableBody.innerHTML = html;
+        tableBody.addEventListener('input', (e) => {
+             if (e.target.getAttribute('data-field') === 'activity-text') {
+                e.target.classList.toggle('empty-field', e.target.textContent.trim() === '');
+                debouncedSaveActivites();
+             }
+        });
     }
 
-    window.toggleScore = function(clickedCell) {
-        const row = clickedCell.closest('.eval-row');
-        if (!row) return;
-
-        if (clickedCell.classList.contains('checked')) {
-            clickedCell.classList.remove('checked');
-            clickedCell.innerHTML = '';
+    window.toggleScore = function(cell) {
+        const row = cell.closest('.eval-row');
+        if (cell.classList.contains('checked')) {
+            cell.classList.remove('checked');
+            cell.innerHTML = '';
         } else {
-            row.querySelectorAll('.checkbox-cell').forEach(cell => {
-                cell.classList.remove('checked');
-                cell.innerHTML = '';
-            });
-            clickedCell.classList.add('checked');
-            clickedCell.innerHTML = '<span class="checked-x">X</span>';
+            row.querySelectorAll('.checkbox-cell').forEach(c => { c.classList.remove('checked'); c.innerHTML = ''; });
+            cell.classList.add('checked');
+            cell.innerHTML = '<span class="checked-x">X</span>';
         }
         debouncedSaveData();
     }
-    
-    function loadSignature(canvasId, base64Image) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
 
-        const ctx = canvas.getContext('2d');
-        const box = canvas.parentElement;
-        
-        canvas.width = box.clientWidth;
-        canvas.height = box.clientHeight;
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000000';
-        
-        if (!base64Image) return;
-
-        const img = new Image();
-        img.onload = function() {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-        img.src = base64Image;
+    window.togglePublic = function(cell) {
+        const isChecked = cell.classList.toggle('checked');
+        cell.innerHTML = isChecked ? '<span class="checked-x">X</span>' : '';
+        cell.closest('td').style.backgroundColor = isChecked ? '#d1fae5' : '';
+        debouncedSaveActivites();
     }
 
-    window.clearCanvas = function(canvasId) {
+    // --- SIGNATURES ---
+    function loadSignature(canvasId, base64) {
         const canvas = document.getElementById(canvasId);
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            debouncedSaveData(); 
-        }
+        if (!canvas || !base64) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        img.src = base64;
+    }
+
+    window.clearCanvas = (id) => {
+        const canvas = document.getElementById(id);
+        if(canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        debouncedSaveData(); 
     }
 
     function setupSignaturePads() {
-        initCanvasRefs(); 
+        initCanvasRefs();
         [canvasStagiaire, canvasTuteur].forEach(canvas => {
             if (!canvas) return;
-
-            const box = canvas.parentElement;
             const ctx = canvas.getContext('2d');
+            let isDrawing = false, lastX = 0, lastY = 0;
 
-            function setCanvasDimensionsAndStyle() {
-                canvas.width = box.clientWidth;
-                canvas.height = box.clientHeight;
-                ctx.lineWidth = 3;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#000000';
-                if (canvas.getAttribute('data-signature-dataurl')) {
-                    loadSignature(canvas.id, canvas.getAttribute('data-signature-dataurl'));
-                }
-            }
-            
-            setCanvasDimensionsAndStyle(); 
-
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-
-            function draw(e) {
-                if (!isDrawing) return;
-                
-                let clientX, clientY;
-                if (e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-
-                const rect = canvas.getBoundingClientRect();
-                const currentX = clientX - rect.left;
-                const currentY = clientY - rect.top;
-
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(currentX, currentY);
-                ctx.stroke();
-
-                [lastX, lastY] = [currentX, currentY];
-            }
-
-            const startDrawing = (e) => {
-                isDrawing = true;
-                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                const rect = canvas.getBoundingClientRect();
-                [lastX, lastY] = [clientX - rect.left, clientY - rect.top];
-                e.preventDefault(); 
+            const setCanvasSize = () => {
+                const dataUrl = canvas.toDataURL();
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+                loadSignature(canvas.id, dataUrl);
             };
-            const stopDrawing = () => {
-                if (isDrawing) {
-                    isDrawing = false;
-                    canvas.setAttribute('data-signature-dataurl', canvas.toDataURL('image/png'));
-                    debouncedSaveData(); 
-                }
-            };
-            
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', () => isDrawing = false);
+            setCanvasSize();
 
-            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return [clientX - rect.left, clientY - rect.top];
+            };
+            const start = (e) => { isDrawing = true; [lastX, lastY] = getPos(e); e.preventDefault(); };
+            const draw = (e) => { if (!isDrawing) return; const [x, y] = getPos(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke(); [lastX, lastY] = [x, y]; };
+            const stop = () => { if (isDrawing) { isDrawing = false; debouncedSaveData(); } };
+            
+            canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseout', stop);
+            canvas.addEventListener('touchstart', start, { passive: false });
             canvas.addEventListener('touchmove', draw, { passive: false });
-            canvas.addEventListener('touchend', stopDrawing);
-            
-            window.addEventListener('resize', debounce(() => {
-                const currentDataUrl = canvas.toDataURL('image/png');
-                setCanvasDimensionsAndStyle();
-                loadSignature(canvas.id, currentDataUrl);
-                canvas.setAttribute('data-signature-dataurl', currentDataUrl);
-            }, 300));
+            canvas.addEventListener('touchend', stop);
+            window.addEventListener('resize', debounce(setCanvasSize, 250));
         });
     }
 
-    window.openModal = function(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.style.display = 'flex';
-        }
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal(id);
+    // --- MODALS ---
+    window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; }
+    window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; }
+    window.launchPrint = () => { closeModal('pdf-modal'); setTimeout(() => window.print(), 100); }
+    
+    // --- EXPORT / IMPORT GLOBAL ---
+    function exportAllData() {
+        const filename = prompt("Veuillez nommer votre fichier de sauvegarde :", `sauvegarde-livret-${new Date().toISOString().split('T')[0]}.json`);
+        if (!filename) return;
+
+        const allData = { suivi: {}, bilan: null, activites: null };
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('livret_alternance_data_')) {
+                allData.suivi[key] = JSON.parse(localStorage.getItem(key));
             }
-        });
-    }
-
-    window.closeModal = function(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.style.display = 'none';
         }
+        allData.bilan = JSON.parse(localStorage.getItem(STORAGE_KEY_BILAN));
+        allData.activites = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVITES));
+        
+        const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename.endsWith('.json') ? filename : `${filename}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showMessage('Exportation complète réussie !', 'success');
     }
 
-    window.launchPrint = function() {
-        closeModal('pdf-modal');
-        setTimeout(() => {
-            window.print(); 
-        }, 100);
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data.suivi && !data.bilan) throw new Error("Format invalide");
+
+                Object.keys(data.suivi || {}).forEach(key => localStorage.setItem(key, JSON.stringify(data.suivi[key])));
+                if (data.bilan) localStorage.setItem(STORAGE_KEY_BILAN, JSON.stringify(data.bilan));
+                if (data.activites) localStorage.setItem(STORAGE_KEY_ACTIVITES, JSON.stringify(data.activites));
+                
+                showMessage('Importation réussie ! La page va se recharger.', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } catch (error) { showMessage('Erreur: Fichier invalide ou corrompu.'); }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // Reset file input
     }
     
+    // --- INITIALISATION ---
     function initApp() {
-        initCanvasRefs();
-        generateEvaluationTable(); 
+        generateEvaluationTable();
+        generateActivitesTable();
         setupSignaturePads();
         
-        document.querySelectorAll('[data-field]').forEach(el => {
-            if (el.textContent.trim() === '') {
-                el.classList.add('empty-field');
-            }
-
-            el.addEventListener('focus', (e) => {
-                e.target.classList.remove('empty-field');
-            });
-            
-            el.addEventListener('blur', (e) => {
-                if (e.target.textContent.trim() === '') {
-                    e.target.classList.add('empty-field');
-                }
-                debouncedSaveData();
-            });
-            
-            el.addEventListener('input', debouncedSaveData); 
-        });
+        // Chargement des données
+        try {
+            const bilanData = JSON.parse(localStorage.getItem(STORAGE_KEY_BILAN));
+            if (bilanData) applyDataToPage(bilanData);
+            const activitesData = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVITES));
+            if (activitesData) applyActivitesDataToPage(activitesData);
+        } catch (e) { console.error("Erreur au chargement des données initiales", e); }
         
-        setupDataListener(); 
+        // Listeners pour sauvegarde auto
+        document.getElementById('app').addEventListener('input', (e) => {
+            if (e.target.closest('[contenteditable]')) {
+                if (e.target.closest('#activites-table-body')) {
+                    // géré par le listener de la table activités
+                } else {
+                    debouncedSaveData();
+                }
+            }
+        });
     }
 
     window.onload = initApp;
 </script>
 </body>
 </html>
+

@@ -97,9 +97,8 @@
             padding: 25px;
             border-radius: 0.75rem;
             width: 90%;
-            max-width: 550px;
+            max-width: 650px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            animation: fadeIn 0.3s;
         }
 
         /* ======================================================= */
@@ -195,11 +194,14 @@
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div class="relative flex items-center justify-center h-16">
             <div class="flex space-x-4">
-                <a href="index.html" class="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
+                <a href="Feuille de Suivi Dynamique dAlternance.html" class="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
                     <span class="text-xl mr-2">📅</span> Feuille de Suivi
                 </a>
-                <a href="bilan.html" class=" text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
+                <a href="bilan.html" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
                     <span class="text-xl mr-2">📄</span> Bilan Final
+                </a>
+                <a href="#" onclick="openModal('tuto-modal')" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
+                    <span class="text-xl mr-2">💡</span> Tutoriel
                 </a>
             </div>
         </div>
@@ -207,24 +209,37 @@
 </nav>
 <body class="bg-gray-100 min-h-screen">
 
-<!-- Modal d'explication de la sauvegarde (Initial) -->
-<div id="save-modal" class="modal">
+<!-- Modal Tutoriel -->
+<div id="tuto-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
-            <span class="mr-2 text-2xl">🗂️</span> À savoir sur ce livret
+            <span class="mr-2 text-2xl">💡</span> Guide d'utilisation
         </h3>
-        <p class="mb-4 text-gray-700">
-            Ce livret est **dynamique** : il garde automatiquement tes données (heures, observations, signatures, etc.) dès que tu les entres.
-        </p>
-        <div class="mb-6 text-red-700 font-bold text-base border border-red-400 p-4 rounded-xl bg-red-100 shadow-lg">
-            ⚠️ Important :
-            <br>
-            Tes données sont sauvegardées uniquement sur **cet appareil et ce navigateur**.
-            <br>
-            👉 Si tu changes d’ordinateur, de téléphone ou que tu supprimes ton historique, tes données seront **perdues**. Utilisez les fonctions Export/Import si besoin.
+        
+        <div class="text-left space-y-4 text-gray-800">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <p class="font-bold">Attention : Sauvegarde Locale Uniquement</p>
+                <p>Toutes les données que vous saisissez sont sauvegardées **uniquement sur votre ordinateur et dans le navigateur que vous utilisez actuellement**. Si vous changez d'appareil ou nettoyez les données de votre navigateur, les informations seront perdues.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg">Exporter toutes vos données :</h4>
+                <p>Utilisez le bouton <strong class="text-blue-600">"Exporter TOUT (JSON)"</strong> pour créer un fichier de sauvegarde unique contenant les informations de la feuille de suivi (tous les mois) et du bilan. Il est conseillé de faire des sauvegardes régulièrement.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg">Importer des données :</h4>
+                <p>Si vous changez d'ordinateur ou si vous voulez récupérer une sauvegarde, cliquez sur <strong class="text-yellow-600">"Importer (JSON)"</strong> et sélectionnez le fichier `.json` que vous aviez précédemment exporté. Toutes vos données seront restaurées.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg">Envoyer votre sauvegarde par e-mail :</h4>
+                <p>Après avoir exporté vos données, vous obtiendrez un fichier (ex: `sauvegarde-livret.json`). Vous pouvez simplement joindre ce fichier à un e-mail comme n'importe quelle autre pièce jointe pour le partager ou le conserver.</p>
+            </div>
         </div>
-        <button onclick="closeModal('save-modal')" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-            J'ai compris, commencer à saisir
+
+        <button onclick="closeModal('tuto-modal')" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 w-full">
+            J'ai compris
         </button>
     </div>
 </div>
@@ -244,7 +259,7 @@
                 Cliquez sur le bouton **"Lancer l'impression"** ci-dessous.
             </li>
             <li>
-                Dans la fenêtre qui apparaît, changez la **Destination** pour **"Enregistrer au format PDF"** (ou **"Microsoft Print to PDF"** selon votre système).
+                Dans la fenêtre qui apparaît, changez la **Destination** pour **"Enregistrer au format PDF"**.
             </li>
             <li>
                 Vérifiez que le livret tient sur **une seule page A4** dans l'aperçu avant d'enregistrer.
@@ -279,28 +294,15 @@
         </div>
 
         <!-- Boutons de Sauvegarde/Partage/Impression -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-3 mt-4">
-            
-            <div class="flex gap-2 w-full md:w-auto">
-                <!-- Export (Télécharger) -->
-                <button onclick="exportData()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-2 px-3 rounded-lg transition duration-200 shadow-md">
-                    ⬇️ Export (JSON)
-                </button>
-                <!-- Import (Charger) -->
-                <button onclick="document.getElementById('import-file').click()" class="flex-1 md:flex-none bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-bold text-sm py-2 px-3 rounded-lg transition duration-200 shadow-md">
-                    ⬆️ Import (JSON)
-                </button>
-                <!-- Champ de fichier caché pour l'import -->
-                <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display: none;">
-            </div>
-
-             <!-- Partager -->
-            <button onclick="shareData()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm py-2 px-4 rounded-lg transition duration-200 shadow-md">
-                🔗 Partager les données
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <button onclick="exportAllData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
+                ⬇️ Exporter TOUT (JSON)
             </button>
-            
-            <!-- PDF Export / Impression (Ouvre le modal explicatif) -->
-            <button onclick="openModal('pdf-modal')" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg mt-2 md:mt-0">
+            <button onclick="document.getElementById('import-file').click()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
+                ⬆️ Importer (JSON)
+            </button>
+            <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display: none;">
+            <button onclick="openModal('pdf-modal')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
                 📄 Exporter en PDF / Imprimer
             </button>
         </div>
@@ -328,34 +330,23 @@
                     <th class="col-obs">OBSERVATIONS (Activités / Tâches)</th>
                 </tr>
             </thead>
-            <tbody id="table-body">
-                <!-- Les lignes du mois seront générées ici par JavaScript -->
-            </tbody>
+            <tbody id="table-body"></tbody>
             <tfoot>
                  <tr class="font-bold bg-indigo-100/70 border-t-2 border-indigo-300">
                     <td style="text-align: right;" class="text-sm md:text-base text-indigo-800">TOTAL DU MOIS</td>
-                    <!-- Les champs d'heures sont maintenant en lecture seule pour les totaux automatiques -->
-                    <td data-field-column="structHours">
-                        <div data-field="totalStructHours" class="text-indigo-800">0</div>
-                    </td>
-                    <td data-field-column="formHours">
-                        <div data-field="totalFormHours" class="text-indigo-800">0</div>
-                    </td>
-                    <td data-field-column="absentHours">
-                        <div data-field="totalAbsentHours" class="text-indigo-800">0</div>
-                    </td>
+                    <td><div data-field="totalStructHours" class="text-indigo-800">0</div></td>
+                    <td><div data-field="totalFormHours" class="text-indigo-800">0</div></td>
+                    <td><div data-field="totalAbsentHours" class="text-indigo-800">0</div></td>
                     <td></td>
                 </tr>
             </tfoot>
         </table>
     </div>
 
-    <!-- Signatures (responsive: stack on mobile, side-by-side on tablet+) -->
+    <!-- Signatures -->
     <div class="mt-10 pt-6 border-t border-gray-300">
         <h2 class="text-xl font-bold mb-4 text-indigo-700">Zones de Signature</h2>
         <div class="flex flex-col md:flex-row justify-between gap-8 text-sm md:text-base">
-            
-            <!-- Signature Alternant -->
             <div class="signature-area w-full md:w-[48%] bg-white p-4 rounded-xl shadow-lg">
                 <p class="font-semibold mb-2 text-indigo-800">Signature de l'Alternant :</p>
                 <div id="signature-alternant-box" class="signature-box">
@@ -365,8 +356,6 @@
                     Effacer la signature
                 </button>
             </div>
-            
-            <!-- Signature Tuteur -->
             <div class="signature-area w-full md:w-[48%] bg-white p-4 rounded-xl shadow-lg">
                 <p class="font-semibold mb-2 text-indigo-800">Signature du Tuteur Entreprise :</p>
                 <div id="signature-tuteur-box" class="signature-box">
@@ -376,17 +365,11 @@
                     Effacer la signature
                 </button>
             </div>
-
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
-
-    // =======================================================
-    // VARIABLES GLOBALES & INITIALISATION
-    // =======================================================
-
     const monthsFr = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
     const daysFr = ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."];
 
@@ -397,380 +380,266 @@
     const alternantNameSpan = document.querySelector('[data-field="alternantName"]');
     const messageBox = document.getElementById('message-box');
     const placeholderText = 'Cliquez pour saisir...';
-
-    // Références aux canvas de signature pour la portée globale (résout l'erreur)
-    let canvasAlternant;
-    let canvasTuteur;
-
-    // =======================================================
-    // UTILS : MESSAGES ET DEBOUNCE
-    // =======================================================
+    let canvasAlternant, canvasTuteur;
 
     function debounce(func, delay) {
         let timeoutId;
-        return function(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func.apply(this, args), delay);
-        };
+        return (...args) => { clearTimeout(timeoutId); timeoutId = setTimeout(() => func.apply(this, args), delay); };
     }
     
     function showMessage(msg, type = 'error') {
         messageBox.textContent = msg;
-        messageBox.classList.remove('text-red-600', 'text-green-600');
+        messageBox.className = 'mt-3 text-center text-sm font-medium ';
         messageBox.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
-        
         clearTimeout(messageBox.timeoutId);
-        messageBox.timeoutId = setTimeout(() => {
-            messageBox.textContent = '';
-        }, 3000);
+        messageBox.timeoutId = setTimeout(() => { messageBox.textContent = ''; }, 4000);
     }
 
-    // =======================================================
-    // GESTION DU CALCUL AUTOMATIQUE DES TOTAUX (NOUVEAU)
-    // =======================================================
-
-    /**
-     * Calcule et affiche les totaux pour toutes les colonnes d'heures.
-     */
     function calculateTotals() {
-        const totalStruct = { element: document.querySelector('[data-field="totalStructHours"]'), sum: 0 };
-        const totalForm = { element: document.querySelector('[data-field="totalFormHours"]'), sum: 0 };
-        const totalAbsent = { element: document.querySelector('[data-field="totalAbsentHours"]'), sum: 0 };
-
-        // Parcourt toutes les lignes du tableau
+        const totals = { structHours: 0, formHours: 0, absentHours: 0 };
         tableBody.querySelectorAll('tr').forEach(row => {
-            const getNumericValue = (day, field) => {
-                const el = row.querySelector(`[data-row-day="${day}"][data-col-field="${field}"]`);
+            const getNumericValue = (field) => {
+                const el = row.querySelector(`[data-col-field="${field}"]`);
                 if (el) {
-                    // Supprime les espaces et remplace la virgule par un point (pour les nombres décimaux)
                     const text = el.textContent.trim().replace(',', '.');
                     const value = parseFloat(text);
                     return isNaN(value) ? 0 : value;
                 }
                 return 0;
             };
-
-            const dayIndex = row.getAttribute('data-day-index');
-            
-            totalStruct.sum += getNumericValue(dayIndex, 'structHours');
-            totalForm.sum += getNumericValue(dayIndex, 'formHours');
-            totalAbsent.sum += getNumericValue(dayIndex, 'absentHours');
+            totals.structHours += getNumericValue('structHours');
+            totals.formHours += getNumericValue('formHours');
+            totals.absentHours += getNumericValue('absentHours');
         });
-
-        // Afficher les totaux avec deux décimales (toFixed(2)) ou sans si c'est un entier
-        totalStruct.element.textContent = totalStruct.sum.toFixed(2).replace(/\.00$/, '');
-        totalForm.element.textContent = totalForm.sum.toFixed(2).replace(/\.00$/, '');
-        totalAbsent.element.textContent = totalAbsent.sum.toFixed(2).replace(/\.00$/, '');
-
-        // Important: sauvegarder après le calcul
+        document.querySelector('[data-field="totalStructHours"]').textContent = totals.structHours.toFixed(2).replace(/\.00$/, '');
+        document.querySelector('[data-field="totalFormHours"]').textContent = totals.formHours.toFixed(2).replace(/\.00$/, '');
+        document.querySelector('[data-field="totalAbsentHours"]').textContent = totals.absentHours.toFixed(2).replace(/\.00$/, '');
         debouncedSaveData(); 
     }
 
-    // =======================================================
-    // GESTION DE LA SAUVEGARDE (LOCAL STORAGE)
-    // =======================================================
+    // --- GESTION DE LA SAUVEGARDE (LOCAL STORAGE) ---
+    const getLocalStorageKey = (month, year) => `livret_alternance_data_${year}-${month}`;
 
-    function getLocalStorageKey(month, year) {
-        return `livret_alternance_data_${year}-${month}`;
-    }
-
-    // 1. Récupérer les données de la page
     function getDataForSave() {
-        const tableData = [];
-        const rows = tableBody.querySelectorAll('tr');
-
-        rows.forEach((row) => {
-            const dayIndex = row.getAttribute('data-day-index');
-            // Cibler les div contenteditable par leur attribut data-col-field
-            const cells = [
-                row.querySelector('[data-col-field="structHours"]'),
-                row.querySelector('[data-col-field="formHours"]'),
-                row.querySelector('[data-col-field="absentHours"]'),
-                row.querySelector('[data-col-field="obs"]')
-            ].filter(el => el); // Filtrer les éléments qui pourraient être null
-            
-            if (cells.length === 4) {
-                // Fonction utilitaire pour nettoyer le texte
-                const getCleanText = (el) => el.textContent.trim().replace(/\s+/g, ' '); 
-
-                tableData.push({
-                    day: dayIndex, 
-                    structHours: getCleanText(cells[0]),
-                    formHours: getCleanText(cells[1]),
-                    absentHours: getCleanText(cells[2]),
-                    obs: getCleanText(cells[3])
-                });
-            }
-        });
-
-        // Retirer le placeholder si présent
+        const tableData = Array.from(tableBody.querySelectorAll('tr')).map(row => ({
+            day: row.getAttribute('data-day-index'),
+            structHours: row.querySelector('[data-col-field="structHours"]').textContent.trim(),
+            formHours: row.querySelector('[data-col-field="formHours"]').textContent.trim(),
+            absentHours: row.querySelector('[data-col-field="absentHours"]').textContent.trim(),
+            obs: row.querySelector('[data-col-field="obs"]').textContent.trim()
+        }));
         const alternantNameText = alternantNameSpan.textContent.trim();
-        const alternantName = (alternantNameText === placeholderText) ? "" : alternantNameText;
-
-        // Les totaux sont lus de la page (calculés par calculateTotals)
-        const totalStructHours = document.querySelector('[data-field="totalStructHours"]').textContent.trim();
-        const totalFormHours = document.querySelector('[data-field="totalFormHours"]').textContent.trim();
-        const totalAbsentHours = document.querySelector('[data-field="totalAbsentHours"]').textContent.trim();
-        
-        // CORRECTION DE L'ERREUR DE RÉFÉRENCE : Utiliser les variables globales 'canvasAlternant' et 'canvasTuteur'
-        const signatureAlternant = canvasAlternant ? canvasAlternant.toDataURL('image/png') : null;
-        const signatureTuteur = canvasTuteur ? canvasTuteur.toDataURL('image/png') : null;
-
         return {
-            alternantName,
-            totalStructHours,
-            totalFormHours,
-            totalAbsentHours,
-            signatureAlternant,
-            signatureTuteur,
+            alternantName: (alternantNameText === placeholderText) ? "" : alternantNameText,
+            signatureAlternant: canvasAlternant ? canvasAlternant.toDataURL('image/png') : null,
+            signatureTuteur: canvasTuteur ? canvasTuteur.toDataURL('image/png') : null,
             tableData,
             month: monthSelect.value,
-            year: yearSelect.value,
-            lastUpdated: new Date().toISOString(),
+            year: yearSelect.value
         };
     }
 
-    // 2. Sauvegarder les données dans localStorage (Debounced)
     const debouncedSaveData = debounce(() => {
         const data = getDataForSave();
         const key = getLocalStorageKey(data.month, data.year);
-
         try {
             localStorage.setItem(key, JSON.stringify(data));
-        } catch (error) {
-            console.error("Erreur de sauvegarde localStorage:", error);
-            showMessage("Erreur: Impossible de sauvegarder les données (Espace de stockage plein ?)");
-        }
+        } catch (error) { showMessage("Erreur de sauvegarde des données."); }
     }, 500); 
 
-    // 3. Appliquer les données chargées sur la page
     function applyDataToPage(data) {
         if (!data) return;
-        
-        // Informations générales
         const nameText = data.alternantName || placeholderText;
         alternantNameSpan.textContent = nameText;
-        
-        if (data.alternantName) {
-            alternantNameSpan.classList.remove('text-gray-400');
-        } else {
-            alternantNameSpan.classList.add('text-gray-400');
-        }
+        alternantNameSpan.classList.toggle('text-gray-400', !data.alternantName);
 
-        // On n'applique plus les totaux directement car ils sont recalculés
-        // document.querySelector('[data-field="totalStructHours"]').textContent = data.totalStructHours || '0';
-        // document.querySelector('[data-field="totalFormHours"]').textContent = data.totalFormHours || '0';
-        // document.querySelector('[data-field="totalAbsentHours"]').textContent = data.totalAbsentHours || '0';
-
-        // Données du tableau
         const tableDataMap = new Map((data.tableData || []).map(item => [item.day, item]));
-        
-        tableBody.querySelectorAll('tr').forEach((row) => {
+        tableBody.querySelectorAll('tr').forEach(row => {
             const dayIndex = row.getAttribute('data-day-index');
             const rowData = tableDataMap.get(dayIndex);
-            
-            // Cibler les divs contenteditable par leur attribut
-            const structCell = row.querySelector('[data-col-field="structHours"]');
-            const formCell = row.querySelector('[data-col-field="formHours"]');
-            const absentCell = row.querySelector('[data-col-field="absentHours"]');
-            const obsCell = row.querySelector('[data-col-field="obs"]');
-            
             if (rowData) {
-                if (structCell) structCell.textContent = rowData.structHours || '';
-                if (formCell) formCell.textContent = rowData.formHours || '';
-                if (absentCell) absentCell.textContent = rowData.absentHours || '';
-                if (obsCell) obsCell.textContent = rowData.obs || '';
+                row.querySelector('[data-col-field="structHours"]').textContent = rowData.structHours || '';
+                row.querySelector('[data-col-field="formHours"]').textContent = rowData.formHours || '';
+                row.querySelector('[data-col-field="absentHours"]').textContent = rowData.absentHours || '';
+                row.querySelector('[data-col-field="obs"]').textContent = rowData.obs || '';
             }
         });
         
-        // Recalculer les totaux après le chargement des données
-        calculateTotals();
-
-        // Signatures
         loadSignature('canvas-alternant', data.signatureAlternant);
         loadSignature('canvas-tuteur', data.signatureTuteur);
+        calculateTotals();
     }
 
-    // 4. Mettre en place la lecture de localStorage
-    function setupDataListener() {
+    function loadCurrentMonthData() {
         const key = getLocalStorageKey(monthSelect.value, yearSelect.value);
-
         try {
             const storedData = localStorage.getItem(key);
-            if (storedData) {
-                const data = JSON.parse(storedData);
-                applyDataToPage(data);
-            } else {
-                applyDataToPage({ 
-                    alternantName: '', 
-                    totalStructHours: '0', 
-                    totalFormHours: '0', 
-                    totalAbsentHours: '0', 
-                    tableData: [],
-                    signatureAlternant: null,
-                    signatureTuteur: null
-                });
-                debouncedSaveData();
-            }
+            applyDataToPage(storedData ? JSON.parse(storedData) : { tableData: [] });
         } catch (error) {
-            console.error("Erreur de chargement ou de parsing localStorage:", error);
-            showMessage("Erreur lors du chargement des données sauvegardées.");
+            showMessage("Erreur de chargement des données sauvegardées.");
+            applyDataToPage({ tableData: [] });
         }
     }
 
-
-    // =======================================================
-    // FONCTIONNALITÉS EXPORT / IMPORT / PARTAGE / PDF
-    // =======================================================
-
-    // Export: Télécharge les données du mois actif dans un fichier JSON
-    window.exportData = function() {
-        const data = getDataForSave();
-        const json = JSON.stringify(data, null, 2);
-        const monthName = monthsFr[parseInt(data.month)];
-        const filename = `livret_alternance_${monthName}_${data.year}.json`;
-        
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showMessage(`Fichier '${filename}' exporté (JSON) avec succès.`, 'success');
-    }
-    
-    // Import: Charge les données à partir d'un fichier JSON
-    window.importData = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (file.type !== 'application/json') {
-            showMessage("Veuillez sélectionner un fichier JSON valide.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedData = JSON.parse(e.target.result);
-                
-                if (!importedData.month || !importedData.year || !importedData.tableData) {
-                    throw new Error("Format de données invalide.");
-                }
-
-                const key = getLocalStorageKey(importedData.month, importedData.year);
-                localStorage.setItem(key, JSON.stringify(importedData));
-                
-                monthSelect.value = importedData.month;
-                yearSelect.value = importedData.year;
-                generateTable(); 
-                
-                showMessage(`Données du mois de ${monthsFr[parseInt(importedData.month)]} ${importedData.year} importées et chargées.`, 'success');
-            } catch (error) {
-                console.error("Erreur d'importation:", error);
-                showMessage("Erreur: Le fichier est corrompu ou au mauvais format.");
-            }
-        };
-        reader.readAsText(file);
-    }
-    
-    // Partage: Copie les données brutes dans le presse-papiers
-    window.shareData = function() {
-        const data = getDataForSave();
-        const json = JSON.stringify(data);
-        
-        const tempTextArea = document.createElement('textarea');
-        tempTextArea.value = json;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showMessage("Données du mois copiées dans le presse-papiers. Collez-les pour les partager.", 'success');
-            } else {
-                 showMessage("Impossible de copier les données. Veuillez le faire manuellement.");
-            }
-        } catch (err) {
-            console.error('Erreur de copie:', err);
-            showMessage("Impossible de copier. Erreur système.");
-        } finally {
-            document.body.removeChild(tempTextArea);
-        }
-    }
-
-    // PDF Export: Ouvre le modal explicatif
-    window.exportToPdf = function() {
-        openModal('pdf-modal');
-    }
-    
-    // Lancer l'impression après l'explication
-    window.launchPrint = function() {
-        closeModal('pdf-modal');
-        window.print(); 
-    }
-
-
-    // =======================================================
-    // LOGIQUE DE DATE & TABLEAU 
-    // =======================================================
-
+    // --- LOGIQUE DE DATE & TABLEAU ---
     function initSelectors() {
         const today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
-
-        monthsFr.forEach((month, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = month;
-            monthSelect.appendChild(option);
-        });
-        
-        const maxYear = new Date().getFullYear() + 5; 
-        for (let y = currentYear - 2; y <= maxYear; y++) {
-            const option = document.createElement('option');
-            option.value = y;
-            option.textContent = y;
-            yearSelect.appendChild(option);
-        }
-
-        monthSelect.value = currentMonth;
-        yearSelect.value = currentYear;
-
+        monthsFr.forEach((m, i) => monthSelect.add(new Option(m, i)));
+        for (let y = today.getFullYear() - 2; y <= today.getFullYear() + 5; y++) yearSelect.add(new Option(y, y));
+        monthSelect.value = today.getMonth();
+        yearSelect.value = today.getFullYear();
         monthSelect.addEventListener('change', generateTable);
         yearSelect.addEventListener('change', generateTable);
-        
-        // Attacher l'événement d'input à la racine pour la délégation
-        document.addEventListener('input', (e) => {
-            if (e.target.closest('[contenteditable="true"]')) {
-                // Si l'input est dans une colonne d'heures, recalculer les totaux
-                if (e.target.getAttribute('data-col-field') === 'structHours' ||
-                    e.target.getAttribute('data-col-field') === 'formHours' ||
-                    e.target.getAttribute('data-col-field') === 'absentHours') {
-                    
-                    // Valider l'entrée pour s'assurer que c'est un nombre valide
-                    let value = e.target.textContent.trim().replace(',', '.');
-                    if (value !== '' && isNaN(parseFloat(value))) {
-                        // Option : Effacer ou afficher un message d'erreur si l'entrée n'est pas un nombre
-                        // Pour l'instant, on laisse la valeur non valide pour la saisie, mais on la traite comme 0 pour le calcul
-                        e.target.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
-                    } else {
-                         e.target.style.backgroundColor = 'transparent';
-                    }
+    }
 
-                    calculateTotals();
-                }
+    function generateTable() {
+        const month = parseInt(monthSelect.value), year = parseInt(yearSelect.value);
+        currentMonthDisplay.textContent = `${monthsFr[month]} ${year}`;
+        tableBody.innerHTML = '';
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        for (let i = 1; i <= daysInMonth; i++) {
+            const date = new Date(year, month, i);
+            const dayOfWeek = date.getDay();
+            const row = tableBody.insertRow();
+            row.setAttribute('data-day-index', i);
+            row.className = (dayOfWeek === 0 || dayOfWeek === 6) ? 'bg-gray-100 text-gray-500' : 'hover:bg-indigo-50/50';
+            row.innerHTML = `
+                <td class="col-day font-semibold text-left pl-2 sticky left-0 bg-white z-10">${daysFr[dayOfWeek]} ${i}</td>
+                <td class="col-hours font-mono"><div contenteditable="true" data-col-field="structHours" class="h-full w-full p-1 min-h-[30px]" inputmode="decimal"></div></td>
+                <td class="col-hours font-mono"><div contenteditable="true" data-col-field="formHours" class="h-full w-full p-1 min-h-[30px]" inputmode="decimal"></div></td>
+                <td class="col-hours font-mono"><div contenteditable="true" data-col-field="absentHours" class="h-full w-full p-1 min-h-[30px]" inputmode="decimal"></div></td>
+                <td class="col-obs text-left pl-2 text-gray-600"><div contenteditable="true" data-col-field="obs" class="h-full w-full p-1 min-h-[30px] text-xs md:text-sm"></div></td>
+            `;
+        }
+        loadCurrentMonthData();
+    }
+    
+    // --- LOGIQUE DE SIGNATURE (CANVAS) ---
+    function initCanvasRefs() {
+        canvasAlternant = document.getElementById('canvas-alternant');
+        canvasTuteur = document.getElementById('canvas-tuteur');
+    }
+    
+    function loadSignature(canvasId, base64) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !base64) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        img.src = base64;
+    }
+
+    window.clearCanvas = (id) => {
+        const canvas = document.getElementById(id);
+        if(canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        debouncedSaveData(); 
+    }
+
+    function setupSignaturePads() {
+        initCanvasRefs();
+        [canvasAlternant, canvasTuteur].forEach(canvas => {
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false, lastX = 0, lastY = 0;
+
+            const setCanvasSize = () => {
+                const dataUrl = canvas.toDataURL();
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+                loadSignature(canvas.id, dataUrl);
+            };
+            setCanvasSize();
+
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return [clientX - rect.left, clientY - rect.top];
+            };
+            const start = (e) => { isDrawing = true; [lastX, lastY] = getPos(e); e.preventDefault(); };
+            const draw = (e) => { if (!isDrawing) return; const [x, y] = getPos(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke(); [lastX, lastY] = [x, y]; };
+            const stop = () => { if (isDrawing) { isDrawing = false; debouncedSaveData(); } };
+            
+            canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseout', stop);
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stop);
+            window.addEventListener('resize', debounce(setCanvasSize, 250));
+        });
+    }
+
+    // --- LOGIQUE DU MODAL ---
+    window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; }
+    window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; }
+    window.launchPrint = () => { closeModal('pdf-modal'); setTimeout(() => window.print(), 100); }
+
+    // --- EXPORT / IMPORT GLOBAL ---
+    function exportAllData() {
+        const filename = prompt("Veuillez nommer votre fichier de sauvegarde :", `sauvegarde-livret-${new Date().toISOString().split('T')[0]}.json`);
+        if (!filename) return;
+
+        const allData = { suivi: {}, bilan: null, activites: null };
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('livret_alternance_data_')) {
+                allData.suivi[key] = JSON.parse(localStorage.getItem(key));
+            } else if (key === 'livret_alternance_bilan_v2_data') {
+                allData.bilan = JSON.parse(localStorage.getItem(key));
+            } else if (key === 'livret_alternance_activites_data') {
+                allData.activites = JSON.parse(localStorage.getItem(key));
+            }
+        }
+        
+        const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename.endsWith('.json') ? filename : `${filename}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showMessage('Exportation complète réussie !', 'success');
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data.suivi && !data.bilan) throw new Error("Format invalide");
+
+                Object.keys(data.suivi || {}).forEach(key => localStorage.setItem(key, JSON.stringify(data.suivi[key])));
+                if (data.bilan) localStorage.setItem('livret_alternance_bilan_v2_data', JSON.stringify(data.bilan));
+                if (data.activites) localStorage.setItem('livret_alternance_activites_data', JSON.stringify(data.activites));
                 
-                // Sauvegarder (pour toutes les cellules éditables)
-                debouncedSaveData();
+                showMessage('Importation réussie ! La page va se recharger.', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } catch (error) { showMessage('Erreur: Fichier invalide ou corrompu.'); }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // Reset file input
+    }
+    
+    // --- Lancement de l'application ---
+    function initApp() {
+        initCanvasRefs();
+        initSelectors();
+        generateTable();
+        
+        document.getElementById('app').addEventListener('input', (e) => {
+            if (e.target.closest('[contenteditable="true"]')) {
+                if (['structHours', 'formHours', 'absentHours'].includes(e.target.getAttribute('data-col-field'))) {
+                    calculateTotals();
+                } else {
+                    debouncedSaveData();
+                }
             }
         });
 
-        // Gestion du placeholder pour l'alternant name
         alternantNameSpan.addEventListener('focus', (e) => {
             if (e.target.textContent.trim() === placeholderText) {
                 e.target.textContent = '';
@@ -784,242 +653,12 @@
             }
             debouncedSaveData();
         });
-    }
-
-    function generateTable() {
-        const selectedMonth = parseInt(monthSelect.value);
-        const selectedYear = parseInt(yearSelect.value);
-
-        currentMonthDisplay.textContent = `${monthsFr[selectedMonth]} ${selectedYear}`;
-        tableBody.innerHTML = '';
-
-        const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const date = new Date(selectedYear, selectedMonth, i);
-            const dayOfWeekIndex = date.getDay(); 
-            const dayOfWeekFr = daysFr[dayOfWeekIndex];
-
-            const row = document.createElement('tr');
-            row.setAttribute('data-day-index', i); 
-            
-            if (dayOfWeekIndex === 0 || dayOfWeekIndex === 6) { 
-                row.classList.add('bg-gray-100', 'text-gray-500');
-            } else {
-                row.classList.add('hover:bg-indigo-50/50');
-            }
-
-            const cellDay = document.createElement('td');
-            cellDay.classList.add('col-day', 'font-semibold', 'text-left', 'pl-2', 'sticky', 'left-0', 'bg-white', 'z-10'); 
-            cellDay.textContent = `${dayOfWeekFr} ${i}`;
-            row.appendChild(cellDay);
-            
-            const fields = ["structHours", "formHours", "absentHours", "obs"];
-            for (let j = 0; j < 4; j++) {
-                const cell = document.createElement('td');
-                
-                const contentDiv = document.createElement('div');
-                contentDiv.contentEditable = "true";
-                contentDiv.setAttribute('data-row-day', i);
-                contentDiv.setAttribute('data-col-field', fields[j]);
-                contentDiv.classList.add('h-full', 'w-full', 'p-1', 'min-h-[30px]', 'placeholder-text-hidden');
-
-                // Rendre les champs d'heures plus visibles pour la saisie
-                if (j < 3) {
-                    contentDiv.classList.add('text-center', 'border', 'border-gray-300', 'rounded', 'bg-white');
-                    // Autoriser uniquement la saisie numérique (via le clavier, pas l'attribut type)
-                    contentDiv.setAttribute('inputmode', 'decimal'); 
-                    contentDiv.setAttribute('placeholder', '0');
-                }
-                
-                if (j === 3) { 
-                    cell.classList.add('col-obs', 'text-left', 'pl-2', 'text-gray-600');
-                    contentDiv.classList.add('text-xs', 'md:text-sm');
-                } else { 
-                    cell.classList.add('col-hours', 'font-mono');
-                    contentDiv.classList.add('text-base', 'font-semibold');
-                }
-                
-                cell.appendChild(contentDiv);
-                row.appendChild(cell);
-            }
-            tableBody.appendChild(row);
-        }
 
         setupSignaturePads();
-        setupDataListener(); 
-        // Les totaux sont calculés à la fin de setupDataListener après le chargement des données.
-    }
-
-
-    // =======================================================
-    // LOGIQUE DE SIGNATURE (CANVAS)
-    // =======================================================
-    // Initialisation des canvas pour une portée globale
-    
-    function initCanvasRefs() {
-        canvasAlternant = document.getElementById('canvas-alternant');
-        canvasTuteur = document.getElementById('canvas-tuteur');
-    }
-    
-    function loadSignature(canvasId, base64Image) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const box = canvas.parentElement;
-        
-        // Redimensionner le canvas pour qu'il corresponde à la taille du conteneur
-        canvas.width = box.clientWidth;
-        canvas.height = box.clientHeight;
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000000';
-        
-        // Si aucune image n'est fournie, ou si elle est vide, on arrête
-        if (!base64Image || base64Image.includes('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYGD4DwAChwGB+AAA5nQkTAAAAABJRU5ErkJggg==')) return;
-
-        const img = new Image();
-        img.onload = function() {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-        img.src = base64Image;
-    }
-
-    window.clearCanvas = function(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            debouncedSaveData(); 
-        }
-    }
-
-    function setupSignaturePads() {
-        initCanvasRefs(); // S'assurer que les références globales sont à jour
-
-        [canvasAlternant, canvasTuteur].forEach(canvas => {
-            if (!canvas) return;
-
-            const box = canvas.parentElement;
-            const ctx = canvas.getContext('2d');
-
-            function setCanvasDimensionsAndStyle() {
-                canvas.width = box.clientWidth;
-                canvas.height = box.clientHeight;
-                ctx.lineWidth = 3;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#000000';
-            }
-            
-            function redrawSignature() {
-                // S'assurer que les données de la signature sont rechargées après un redimensionnement
-                const data = getDataForSave();
-                const signatureKey = canvas.id === 'canvas-alternant' ? data.signatureAlternant : data.signatureTuteur;
-                loadSignature(canvas.id, signatureKey);
-            }
-            
-            setCanvasDimensionsAndStyle(); 
-
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-
-            function draw(e) {
-                if (!isDrawing) return;
-                
-                let clientX, clientY;
-                if (e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-
-                const rect = canvas.getBoundingClientRect();
-                const currentX = clientX - rect.left;
-                const currentY = clientY - rect.top;
-
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(currentX, currentY);
-                ctx.stroke();
-
-                [lastX, lastY] = [currentX, currentY];
-            }
-
-            const startDrawing = (e) => {
-                isDrawing = true;
-                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                const rect = canvas.getBoundingClientRect();
-                [lastX, lastY] = [clientX - rect.left, clientY - rect.top];
-                e.preventDefault(); 
-            };
-            const stopDrawing = () => {
-                if (isDrawing) {
-                    isDrawing = false;
-                    debouncedSaveData(); 
-                }
-            };
-            
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', () => isDrawing = false);
-
-            canvas.addEventListener('touchstart', startDrawing, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            canvas.addEventListener('touchend', stopDrawing);
-            
-            // Redimensionnement
-            window.addEventListener('resize', debounce(() => {
-                setCanvasDimensionsAndStyle();
-                redrawSignature();
-            }, 300));
-        });
-    }
-
-    // =======================================================
-    // LOGIQUE DU MODAL
-    // =======================================================
-
-    window.openModal = function(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.style.display = 'flex';
-        }
-    }
-
-    window.closeModal = function(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.style.display = 'none';
-        }
-        // Marquer le modal d'accueil comme vu une fois qu'il est fermé.
-        if (id === 'save-modal') {
-             localStorage.setItem('livret_modal_shown', 'true');
-        }
-    }
-    
-    function showWelcomeModal() {
-        if (!localStorage.getItem('livret_modal_shown')) {
-            openModal('save-modal');
-        }
-    }
-
-    // Lancement de l'application
-    function initApp() {
-        initCanvasRefs(); // Initialiser les références au chargement
-        initSelectors();
-        generateTable(); 
-        showWelcomeModal();
     }
 
     window.onload = initApp;
 </script>
 </body>
 </html>
+
