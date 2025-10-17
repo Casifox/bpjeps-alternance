@@ -3,254 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan d'Évaluation Tuteur - Alternance</title>
-    <!-- Chargement de Tailwind CSS pour un style moderne et des utilitaires responsives -->
+    <title>Bilan d'Évaluation Tuteur - Alternance BPJEPS</title>
+    <!-- Chargement de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Configuration de la police Inter et styles de conteneur */
         html { font-family: 'Inter', sans-serif; }
         
         .page-container {
-            max-width: 1000px; 
+            max-width: 1100px; /* Légèrement plus large pour la lisibilité des colonnes */
             margin: 0 auto;
             padding: 1rem; 
         }
+        
+        /* STYLE PROFESSIONNEL: Conteneur principal (La "Fiche") */
+        .professional-card {
+            background-color: white;
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Ombre très légère */
+            border: 1px solid #e5e7eb; /* Bordure légère */
+            padding: 2.5rem;
+            transition: all 0.3s;
+        }
+
         @media (min-width: 640px) { /* sm */
              .page-container {
                 padding: 2rem;
-                border: 1px solid #e0e0e0;
-                border-radius: 0.75rem;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-                margin: 2rem auto;
             }
         }
         
-        /* Styles pour les champs éditables */
+        /* Styles pour les champs éditables (clairs et encadrés) */
         [contenteditable="true"] {
-            border-bottom: 2px dashed #e0e0e0;
-            padding: 2px 4px;
+            /* Couleur de fond très légère pour indiquer l'éditabilité */
+            background-color: #f9fafb; 
+            border: 1px solid #d1d5db; /* Gray-300 */
+            border-radius: 4px;
+            padding: 4px 6px;
             min-width: 50px;
             display: inline-block;
-            transition: border-bottom-color 0.2s;
+            transition: all 0.2s;
             outline: none;
             cursor: text;
         }
         [contenteditable="true"]:focus {
-            border-bottom-color: #3b82f6;
-            background-color: #f0f8ff;
+            border-color: #1e40af; /* Blue-800 pour le focus */
+            background-color: #fff;
+            box-shadow: 0 0 0 1px #1e40af;
         }
 
-        /* Assure que le texte passe à la ligne (word-wrap) */
-        .motivation-field {
-            white-space: pre-wrap; 
-            height: auto; 
+        /* Afficher un placeholder visible en ligne, mais invisible à l'impression */
+        [contenteditable="true"]:empty:not(:focus)::before {
+            content: attr(data-placeholder);
+            color: #9ca3af; /* Gray-400 */
+            font-style: italic;
+            opacity: 0.9;
         }
         
-        /* Style pour les champs vides avec texte d'indication */
-        .empty-field::before {
-            content: attr(data-placeholder);
-            color: #9ca3af; 
-            pointer-events: none; 
-        }
-        /* Cache le texte d'indication quand le champ a le focus ou n'est pas vide */
-        .empty-field:focus::before, [contenteditable="true"]:not(.empty-field)::before {
-            content: none;
+        /* Style pour les champs de motivation qui s'auto-adaptent */
+        .auto-grow-motivation {
+            min-height: 44px; /* Hauteur minimale légèrement augmentée */
+            overflow-y: hidden; 
+            box-sizing: border-box;
+            line-height: 1.4; 
+            
+            /* FIX CRITIQUE: Empêche le débordement du texte hors de la cellule */
+            word-wrap: break-word; 
+            overflow-wrap: break-word; 
+            word-break: break-all;
         }
 
-        /* Styles spécifiques au tableau d'évaluation */
-        .eval-table {
-            border-collapse: collapse;
+
+        /* Styles de la table d'évaluation */
+        .evaluation-table {
             width: 100%;
+            border-collapse: separate; /* Permet d'appliquer border-radius au conteneur */
+            border-spacing: 0;
         }
-        .eval-table th, .eval-table td {
-            border: 1px solid #cbd5e1;
-            padding: 8px;
-            font-size: 0.875rem; 
-            vertical-align: middle; 
+        
+        .evaluation-table th, .evaluation-table td {
+            border: 0; /* Suppression des bordures individuelles */
+            padding: 1rem 0.75rem;
+            text-align: left;
+            vertical-align: middle;
         }
-        .eval-table th {
-            background-color: #e0f2f7; 
-            color: #0c4a6e; 
+        
+        /* Bordures horizontales légères */
+        .evaluation-table tbody tr {
+            border-bottom: 1px solid #f3f4f6; 
+        }
+        .evaluation-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* En-tête de table (Dark Gray) */
+        .evaluation-table thead th {
+            background-color: #1f2937; /* Gris très foncé / Noir léger */
+            color: white;
+            font-weight: 600;
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+        .evaluation-table thead tr th:first-child { border-top-left-radius: 8px; }
+        .evaluation-table thead tr th:last-child { border-top-right-radius: 8px; }
+
+        /* Styles pour les sous-titres de table (Bilan 3 - Light Blue Accent) */
+        .evaluation-table .subsection-title {
+            background-color: #eff6ff; /* Bleu très pâle (Blue-50) */
+            font-weight: 700;
+            color: #1e40af; /* Bleu marine (Blue-800) - Nouvelle couleur forte */
+            padding: 0.75rem;
+            border-bottom: 2px solid #bfdbfe; /* Blue-200 */
+            font-style: italic;
+        }
+
+        /* En-tête de section principal (Deep Blue) */
+        .bilan-header {
+            background-color: #1e3a8a; /* Bleu très foncé (Blue-900) - Nouvelle couleur principale */
+            color: white;
             text-align: center;
             font-weight: 700;
-        }
-        .eval-table th:first-child {
-            text-align: left; 
-        }
-        
-        /* Colonnes Acquis (J) / Entre les deux (K) / Non Acquis (L) */
-        .col-eval {
-            width: 100px; 
-            text-align: center;
-            font-weight: bold;
-            transition: background-color 0.1s;
-        }
-        
-        /* Couleurs pour les scores J, K, L */
-        .col-j { background-color: #d1fae5; }
-        .col-k { background-color: #fffbeb; }
-        .col-l { background-color: #fee2e2; }
-
-        /* Case à cocher personnalisée */
-        .checkbox-cell {
-            cursor: pointer;
-            user-select: none;
-            padding: 4px; 
-        }
-        .checkbox-cell:hover {
-            opacity: 0.8;
-        }
-        .checked-x {
-            font-size: 1.25rem;
-            font-weight: 900;
-        }
-        
-        /* Couleur de la croix en fonction de la colonne */
-        .col-j .checked-x { color: #065f46; }
-        .col-k .checked-x { color: #b45309; }
-        .col-l .checked-x { color: #dc2626; }
-        
-        /* Styles pour la zone de signature */
-        .signature-box {
-            border: 2px solid #3b82f6; 
-            border-radius: 0.5rem;
-            height: 120px; 
-            background-color: #f9fafb;
-            cursor: crosshair; 
-        }
-        .signature-box canvas {
-            display: block;
-        }
-        
-        /* Conteneur des tables pour faciliter l'impression */
-        .table-container {
+            padding: 1rem;
+            border-radius: 8px;
             margin-bottom: 2rem;
+            letter-spacing: 0.08em;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+            font-size: 1.25rem;
+        }
+        
+        /* Style pour la zone d'avertissement */
+        .alert-box {
+            background-color: #f0f9ff; /* Blue-50 */
+            border-left: 4px solid #0056b3; /* Un bleu plus profond */
+            color: #0056b3;
+            padding: 1rem;
+            border-radius: 4px;
         }
 
-        /* Style des Modals */
-        .modal {
-            display: none; 
-            position: fixed;
-            z-index: 1000; 
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 0.75rem;
-            width: 90%;
-            max-width: 650px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        
-        /* ======================================================= */
-        /* MEDIA QUERY POUR L'IMPRESSION (VERSION A4 PROPRE) */
-        /* ======================================================= */
-        @page {
-            size: A4 portrait;
-            margin: 0.5cm;
-        }
-        
+
+        /* ---------------------------------------------------------------------- */
+        /* --- OPTIMISATION POUR L'IMPRESSION (PDF) ---                         */
+        /* ---------------------------------------------------------------------- */
+
         @media print {
-            .no-print { display: none !important; }
-            body { margin: 0; padding: 0; background-color: white !important; }
-            .page-container { 
-                width: 100%; 
-                margin: 0; 
-                padding: 0.5cm;
-                border: none; 
-                box-shadow: none; 
-                max-width: none;
-                font-size: 10pt;
+            /* Masquer tous les éléments interactifs et d'interface */
+            .no-print {
+                display: none !important;
             }
-            h1, h2 { color: #000 !important; }
             
-            /* FORCER LA DENSITÉ POUR GAGNER DE L'ESPACE VERTICAL */
-            .table-container {
-                margin-bottom: 0.8rem !important; 
+            /* Réinitialiser le conteneur principal à une page simple */
+            .page-container, .professional-card {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
             }
-            .eval-table th, .eval-table td {
-                border-color: #444 !important;
-                padding: 2px 4px !important; 
-                font-size: 7.5pt; 
-                line-height: 1.2;
-                vertical-align: top; 
-            }
-            .eval-table th { 
-                background-color: #eee !important; 
-                color: #000 !important;
-                font-size: 7pt !important; 
-                line-height: 1.1;
-                text-align: center;
-            }
-             .eval-table th:first-child {
-                text-align: left;
-                font-size: 7.5pt !important;
+            body {
+                background-color: white !important;
+                /* Aides à l'impression (s'assurer que les éléments ne sont pas coupés) */
+                orphans: 3;
+                widows: 3;
             }
 
-            .col-j { background-color: #d4edda !important; } 
-            .col-k { background-color: #fff3cd !important; } 
-            .col-l { background-color: #f8d7da !important; } 
-            
-            /* ÉVITER LES SAUTS DE PAGE INOPPORTUNS */
-            .table-container {
-                page-break-after: avoid; 
-                page-break-inside: auto; 
+            /* Forcer l'impression des couleurs et fonds pour la structure (Clé de l'impression couleur) */
+            .evaluation-table th, .evaluation-table .subsection-title, .bilan-header, .alert-box, .p-4.bg-gray-50 {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            /* Conserver les styles de couleurs des en-têtes */
+            .evaluation-table th { background-color: #1f2937 !important; color: white !important; }
+            .evaluation-table .subsection-title { 
+                background-color: #eff6ff !important; 
+                color: #1e40af !important; /* Bleu marine */
+                border-bottom: 1px solid #e5e7eb !important; 
+            }
+            .bilan-header { background-color: #1e3a8a !important; color: white !important; border-radius: 0 !important; }
+            .alert-box { background-color: #f0f9ff !important; border-left-color: #0056b3 !important; color: #0056b3 !important;}
+
+
+            /* Rendre les champs de saisie invisibles, ne garder que le texte */
+            [contenteditable="true"] {
+                 background-color: white !important;
+                 border: none !important;
+                 padding: 0 !important;
+                 /* Forcer le contenu à être affiché comme du texte simple */
+                 display: block !important;
+                 min-height: 1.5em !important;
             }
             
-            /* Optimisation des signatures */
-            .signature-zone {
-                margin-top: 0.5rem !important; 
-                padding-top: 0.5rem !important; 
-                border-top-width: 1px !important; 
+            /* Rendre le placeholder invisible à l'impression */
+            [contenteditable="true"]:empty:not(:focus)::before {
+                content: none !important;
             }
             
-            .signature-wrapper {
-                display: flex !important;
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                gap: 0.8rem !important; 
-                margin-top: 0.5rem !important;
-            }
-            .signature-area { 
-                width: 49% !important; 
+            /* Sélecteurs de notation : masquer la balise <select> et afficher le texte uniquement */
+            .evaluation-table select {
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background: none;
+                border: none;
+                font-weight: bold;
                 padding: 0;
-            }
-            .signature-box {
-                border: 1px solid #000 !important; 
-                height: 70px !important; 
-                background-color: transparent !important;
+                color: #1f2937; /* Couleur du texte des notations */
             }
 
-            /* Nettoyage des champs éditables et suppression des placeholders */
-            [contenteditable="true"] { 
-                border-bottom: 1px solid #000 !important; 
-                background-color: transparent !important;
-                color: #000 !important;
-                min-width: 80px !important;
-                display: block;
-            }
-            .empty-field::before {
-                content: none !important; 
-            }
-            /* Assure que la motivation ne crée pas de scrollbar horizontale */
-            .motivation-field {
-                overflow: visible !important;
-            }
+            /* Styles pour la zone de motivation (texte long) */
+             .auto-grow-motivation {
+                overflow: visible !important; /* Autoriser le texte à s'étendre */
+                height: auto !important;
+                min-height: 1.5em !important; /* Hauteur minimale pour les champs vides ou courts */
+                padding: 0 !important;
+                border: none !important;
+                background-color: white !important;
+             }
+             
+             /* Styles des sections d'informations (Nom, Tuteur, Structure) */
+             .p-4.bg-gray-50 {
+                 border: 1px solid #e5e7eb !important; /* Conserver une bordure légère */
+                 background-color: white !important;
+                 padding: 8px !important;
+                 margin-bottom: 8px !important;
+             }
+             
+             /* Signatures : s'assurer que le cadre est visible et le bouton effacer invisible */
+             #signature-stagiaire, #signature-tuteur {
+                 border: 1px solid #d1d5db !important;
+             }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-
-<!-- Barre de Navigation -->
 <nav class="bg-blue-900 shadow-lg sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div class="relative flex items-center justify-center h-16">
@@ -261,566 +246,767 @@
                 <a href="bilan.html" class="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
                     <span class="text-xl mr-2">📄</span> Bilan Final
                 </a>
-                <a href="#" onclick="openModal('tuto-modal')" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150">
-                    <span class="text-xl mr-2">💡</span> Tutoriel
-                </a>
             </div>
         </div>
     </div>
 </nav>
 
-<!-- Modal d'export PDF (Explicatif) -->
-<div id="pdf-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center">
-            <span class="mr-2 text-2xl">📄</span> Exporter en PDF
-        </h3>
-        <p class="mb-4 text-gray-700">
-            Pour imprimer ou enregistrer ce bilan au format PDF, cliquez sur le bouton ci-dessous, puis choisissez **"Enregistrer au format PDF"** dans les options d'impression de votre navigateur.
-        </p>
-        <button onclick="launchPrint()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-            Lancer l'impression
-        </button>
-    </div>
-</div>
-
-<!-- Modal Tutoriel -->
-<div id="tuto-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
-            <span class="mr-2 text-2xl">💡</span> Guide d'utilisation
-        </h3>
+<body class="bg-gray-50">
+    <div id="app" class="page-container">
+        <!-- Message Box -->
+        <div id="message-box" class="fixed top-4 right-4 z-50 no-print"></div>
         
-        <div class="text-left space-y-4 text-gray-800">
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
-                <p class="font-bold">Attention : Sauvegarde Locale Uniquement</p>
-                <p>Toutes les données que vous saisissez sont sauvegardées **uniquement sur votre ordinateur et dans le navigateur que vous utilisez actuellement**. Si vous changez d'appareil ou nettoyez les données de votre navigateur, les informations seront perdues.</p>
-            </div>
-
-            <div>
-                <h4 class="font-bold text-lg">Exporter toutes vos données :</h4>
-                <p>Utilisez le bouton <strong class="text-blue-600">"Exporter TOUT (JSON)"</strong> pour créer un fichier de sauvegarde unique contenant les informations de la feuille de suivi (tous les mois) et du bilan. Il est conseillé de faire des sauvegardes régulièrement.</p>
-            </div>
-
-            <div>
-                <h4 class="font-bold text-lg">Importer des données :</h4>
-                <p>Si vous changez d'ordinateur ou si vous voulez récupérer une sauvegarde, cliquez sur <strong class="text-yellow-600">"Importer (JSON)"</strong> et sélectionnez le fichier `.json` que vous aviez précédemment exporté. Toutes vos données seront restaurées.</p>
-            </div>
-
-            <div>
-                <h4 class="font-bold text-lg">Envoyer votre sauvegarde par e-mail :</h4>
-                <p>Après avoir exporté vos données, vous obtiendrez un fichier (ex: `sauvegarde-livret.json`). Vous pouvez simplement joindre ce fichier à un e-mail comme n'importe quelle autre pièce jointe pour le partager ou le conserver.</p>
-            </div>
-        </div>
-
-        <button onclick="closeModal('tuto-modal')" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 w-full">
-            J'ai compris
-        </button>
-    </div>
-</div>
-
-<div id="app" class="page-container bg-white">
-    <header class="text-center mb-6">
-        <h1 class="text-xl md:text-2xl font-extrabold text-blue-800 border-b-4 border-blue-200 pb-2">
-            BILAN D'ÉVALUATION TUTEUR - FORMATION BPJEPS
-        </h1>
-    </header>
-    
-    <!-- Boutons d'action -->
-    <div class="no-print text-center mb-6 flex flex-wrap items-center justify-center gap-4">
-        <button onclick="openModal('pdf-modal')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
-            PDF (Bilan Seul)
-        </button>
-        <button onclick="exportAllData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
-            ⬇️ Exporter TOUT (JSON)
-        </button>
-        <button onclick="document.getElementById('import-file').click()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-bold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg">
-            ⬆️ Importer (JSON)
-        </button>
-        <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display: none;">
-        <p id="message-box" class="w-full mt-2 text-center text-sm font-medium text-red-600"></p>
-    </div>
-
-    <!-- Informations générales (Période et Stagiaire) -->
-    <div class="mb-6 p-4 border rounded-lg bg-blue-50/50 shadow-sm text-sm md:text-base">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <p>
-                <strong>PÉRIODE :</strong> 
-                <span id="period" contenteditable="true" data-field="period" data-placeholder="Ex: DU 15/09/2025 AU 31/12/2025" class="empty-field font-bold"></span>
-            </p>
-            <p>
-                <strong>STAGIAIRE :</strong> 
-                <span id="stagiaire-name" contenteditable="true" data-field="stagiaireName" data-placeholder="Nom et Prénom du stagiaire" class="empty-field font-bold"></span>
-            </p>
-        </div>
-        <p class="mt-4 text-xs italic text-gray-600 border-t pt-2">
-            Merci de mettre une croix (clic) dans les cases concernées et d'accompagner la notation d'un avis motivé dans la colonne "MOTIVATION DE L'ÉVALUATION". (Acquis=Vert, Entre les deux=Orange, Non Acquis=Rouge).
-        </p>
-    </div>
-
-    <!-- Section 1 : COMPORTEMENT GENERAL -->
-    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider">COMPORTEMENT GÉNÉRAL</h2>
-    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
-        <table class="eval-table bg-white">
-            <thead>
-                <tr>
-                    <th class="w-1/2">CRITÈRES</th>
-                    <th class="col-eval col-j">Acquis</th>
-                    <th class="col-eval col-k">Entre les deux</th>
-                    <th class="col-eval col-l">Non Acquis</th>
-                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
-                </tr>
-            </thead>
-            <tbody id="comportement-body">
-                <!-- Les lignes d'évaluation sont ajoutées par JS -->
-            </tbody>
-        </table>
-    </div>
-    
-    <!-- Section 2 : COMPETENCES BPJEPS -->
-    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
-        UC1 : ENCADRER TOUT PUBLIC DANS TOUT LIEU ET TOUTE STRUCTURE
-    </h2>
-    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
-        <table class="eval-table bg-white">
-             <thead>
-                <tr>
-                    <th class="w-1/2">CRITÈRES</th>
-                    <th class="col-eval col-j">Acquis</th>
-                    <th class="col-eval col-k">Entre les deux</th>
-                    <th class="col-eval col-l">Non Acquis</th>
-                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
-                </tr>
-            </thead>
-            <tbody id="competences-uc1-body">
-            </tbody>
-        </table>
-    </div>
-    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
-        UC2 : METTRE EN ŒUVRE UN PROJET D’ANIMATION S’INSCRIVANT DANS LE PROJET DE LA STRUCTURE
-    </h2>
-    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
-        <table class="eval-table bg-white">
-             <thead>
-                <tr>
-                    <th class="w-1/2">CRITÈRES</th>
-                    <th class="col-eval col-j">Acquis</th>
-                    <th class="col-eval col-k">Entre les deux</th>
-                    <th class="col-eval col-l">Non Acquis</th>
-                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
-                </tr>
-            </thead>
-            <tbody id="competences-uc2-body">
-            </tbody>
-        </table>
-    </div>
-    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
-        UC3 : CONDUIRE UNE SÉANCE, UN CYCLE D’ANIMATION OU D’APPRENTISSAGE
-    </h2>
-    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
-        <table class="eval-table bg-white">
-             <thead>
-                <tr>
-                    <th class="w-1/2">CRITÈRES</th>
-                    <th class="col-eval col-j">Acquis</th>
-                    <th class="col-eval col-k">Entre les deux</th>
-                    <th class="col-eval col-l">Non Acquis</th>
-                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
-                </tr>
-            </thead>
-            <tbody id="competences-uc3-body">
-            </tbody>
-        </table>
-    </div>
-    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">
-        UC4 : MOBILISER LES TECHNIQUES DE LA MENTION POUR METTRE EN ŒUVRE UNE SÉANCE
-    </h2>
-    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
-        <table class="eval-table bg-white">
-            <thead>
-                <tr>
-                    <th class="w-1/2">CRITÈRES</th>
-                    <th class="col-eval col-j">Acquis</th>
-                    <th class="col-eval col-k">Entre les deux</th>
-                    <th class="col-eval col-l">Non Acquis</th>
-                    <th class="w-1/4 text-center">MOTIVATION DE L'ÉVALUATION</th>
-                </tr>
-            </thead>
-            <tbody id="competences-uc4-body">
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Section 3 : ACTIVITÉS ET PUBLICS -->
-    <h2 class="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider mt-6">ACTIVITÉS PHARES ET PUBLICS ENCADRÉS</h2>
-    <div class="table-container overflow-x-auto shadow-xl rounded-lg border border-gray-200">
-        <table class="eval-table bg-white">
-            <thead>
-                <tr>
-                    <th class="w-1/3">ACTIVITÉS TYPES</th>
-                    <th colspan="6">PUBLICS</th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th class="text-xs font-semibold">Jeunes enfants</th>
-                    <th class="text-xs font-semibold">Enfants</th>
-                    <th class="text-xs font-semibold">Préados et ados</th>
-                    <th class="text-xs font-semibold">Adultes</th>
-                    <th class="text-xs font-semibold">Seniors</th>
-                    <th class="text-xs font-semibold">Situation handicap</th>
-                </tr>
-            </thead>
-            <tbody id="activites-table-body">
-                <!-- Lignes générées par JS -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Zones de Signature -->
-    <div class="signature-zone mt-10 pt-6 border-t-2 border-gray-400">
-        <div class="signature-wrapper flex flex-col md:flex-row justify-between gap-8 text-sm md:text-base">
-            <div class="signature-area w-full md:w-1/2 bg-white p-4 rounded-xl shadow-lg border">
-                <p class="font-semibold mb-2 text-indigo-800">Signature du stagiaire :</p>
-                <div id="signature-stagiaire-box" class="signature-box">
-                    <canvas id="canvas-stagiaire" class="w-full h-full" data-signature-id="stagiaire"></canvas>
+        <!-- Modal pour la saisie du nom de fichier -->
+        <div id="filename-modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-[100] hidden no-print">
+            <div class="bg-white rounded-xl shadow-2xl p-7 w-11/12 max-w-md transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+                <h3 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">Exporter les Bilans</h3>
+                <p class="text-gray-600 mb-5 text-sm">Saisissez le nom pour l'exportation JSON qui contient les données de tous les bilans.</p>
+                
+                <label for="filename-input" class="block text-sm font-medium text-gray-700 mb-2">Nom du fichier (.json) :</label>
+                <input type="text" id="filename-input" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-600 focus:border-blue-600 mb-6 text-lg" placeholder="Ex: Bilans_Alternance_Jean_DUPONT">
+                
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeFilenameModal()" class="px-5 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-150 font-medium">
+                        Annuler
+                    </button>
+                    <button onclick="performExport()" class="px-5 py-2 text-white bg-blue-700 rounded-lg shadow-md hover:bg-blue-800 transition duration-150 font-medium">
+                        Télécharger
+                    </button>
                 </div>
-                <button onclick="clearCanvas('canvas-stagiaire')" class="no-print text-xs text-red-500 hover:text-red-700 mt-2 font-medium transition duration-150">
-                    Effacer la signature
-                </button>
-            </div>
-            <div class="signature-area w-full md:w-1/2 bg-white p-4 rounded-xl shadow-lg border">
-                <p class="font-semibold mb-2 text-indigo-800">Signature du tuteur ou référent :</p>
-                <div id="signature-tuteur-box" class="signature-box">
-                    <canvas id="canvas-tuteur" class="w-full h-full" data-signature-id="tuteur"></canvas>
-                </div>
-                <button onclick="clearCanvas('canvas-tuteur')" class="no-print text-xs text-red-500 hover:text-red-700 mt-2 font-medium transition duration-150">
-                    Effacer la signature
-                </button>
             </div>
         </div>
-    </div>
-</div>
+        <!-- Fin de Modal -->
 
-<script type="text/javascript">
-    const criteria = {
-        comportement: [
-            "Ponctualité", "Assiduité", "Intégration dans l'équipe", "Application au travail", "Initiative - adaptabilité",
-        ],
-        competences: {
-            'uc1': { list: ["Communiquer dans les situations de la vie professionnelle", "Prendre en compte les caractéristiques des publics dans leurs environnements dans une démarche d'éducation à la citoyenneté", "Contribuer au fonctionnement d’une structure"] },
-            'uc2': { list: ["Concevoir un projet d’animation", "Conduire un projet d’animation", "Évaluer un projet d’animation"] },
-            'uc3': { list: ["Concevoir la séance, le cycle d’animation ou d’apprentissage", "Conduire la séance, le cycle d’animation ou d’apprentissage", "Évaluer la séance, le cycle d’animation ou d’apprentissage"] },
-            'uc4': { list: ["Conduire une séance ou un cycle en utilisant les techniques de la mention", "Maîtriser et faire appliquer les règlements de la mention", "Garantir des conditions de pratique en sécurité"] }
+        <!-- Contenu principal encapsulé dans la carte professionnelle -->
+        <div class="professional-card">
+
+            <header class="text-center mb-10">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">LIVRET D'ALTERNANCE</h1>
+                <h2 class="text-xl font-medium text-gray-600">FICHE D'ÉVALUATION DU TUTEUR (BPJEPS APT)</h2>
+            </header>
+
+            <!-- Section Boutons d'Action (Masquée à l'impression grâce à no-print) -->
+            <div class="no-print mb-8 p-5 bg-gray-100 rounded-xl shadow-md border border-gray-200 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-6">
+                
+                <!-- Sélecteur de Bilan (Onglets) -->
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <label for="bilan-select" class="text-base font-semibold text-gray-700 whitespace-nowrap">Bilan en cours :</label>
+                    <select id="bilan-select" class="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-700 focus:border-blue-700 transition duration-150 ease-in-out bg-white text-gray-800 w-full md:w-auto">
+                        <!-- Les valeurs correspondent aux clés dans EVALUATION_CRITERIA -->
+                        <option value="1">Bilan 1</option>
+                        <option value="2">Bilan 2</option>
+                        <option value="3">Bilan 3</option>
+                    </select>
+                </div>
+                
+                <p id="bilan-period" class="text-lg font-bold text-blue-700 text-center md:text-left whitespace-nowrap">Période : Septembre - Décembre</p>
+
+                <!-- Boutons Export/Import/Print -->
+                <div class="flex flex-wrap justify-center gap-3 w-full md:w-auto">
+                    
+                    <!-- Bouton PDF / Imprimer -->
+                    <button onclick="window.print()" class="flex items-center space-x-2 bg-gray-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:bg-gray-800 transition duration-150 transform hover:scale-[1.02] text-sm">
+                        <!-- Icône Imprimer -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                        <span>Imprimer</span>
+                    </button>
+                    
+                    <!-- Bouton Exporter (Appelle la modale) -->
+                    <button onclick="openFilenameModal()" class="flex items-center space-x-2 bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:bg-blue-800 transition duration-150 transform hover:scale-[1.02] text-sm">
+                        <!-- Icône Exporter -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        <span>Exporter</span>
+                    </button>
+                    
+                    <!-- Bouton Importer -->
+                    <div class="relative">
+                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+                        <label for="import-file" class="flex items-center space-x-2 bg-gray-400 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:bg-gray-500 cursor-pointer transition duration-150 transform hover:scale-[1.02] text-sm">
+                            <!-- Icône Importer -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                            <span>Importer</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bilan-content">
+                <!-- Le contenu du bilan (tables) sera généré ici par JavaScript -->
+                <p class="text-center text-gray-500 py-10">Chargement des critères d'évaluation...</p>
+            </div>
+
+            <!-- Section Stagiaire/Tuteur -->
+            <div class="mt-10 pt-6 border-t border-gray-300">
+                <p class="text-sm mb-6 italic alert-box">
+                    Veuillez sélectionner le niveau d'acquisition des compétences (**Acquis** / **En cours d'acquisition** / **Non acquis**) et accompagner la notation d'un avis motivé.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-base">
+                    <!-- Informations Stagiaire -->
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <p class="font-bold mb-2 text-gray-700 border-b border-gray-200 pb-1">STAGIAIRE</p>
+                        <p class="text-gray-600">Nom: <span id="stagiaire-name" contenteditable="true" data-placeholder="Nom Prénom Stagiaire" class="text-blue-700 font-semibold"></span></p>
+                    </div>
+                    <!-- Informations Tuteur -->
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <p class="font-bold mb-2 text-gray-700 border-b border-gray-200 pb-1">TUTEUR</p>
+                        <p class="text-gray-600">Nom: <span id="tuteur-name" contenteditable="true" data-placeholder="Nom Prénom Tuteur" class="text-gray-700 font-medium"></span></p>
+                    </div>
+                    <!-- Informations Structure -->
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <p class="font-bold mb-2 text-gray-700 border-b border-gray-200 pb-1">STRUCTURE</p>
+                        <p class="text-gray-600">Nom: <span id="structure-name" contenteditable="true" data-placeholder="Nom de la structure" class="text-gray-700 font-medium"></span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section Signatures -->
+            <div class="mt-12 pt-8 border-t border-gray-300 grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <p class="font-semibold text-gray-700 mb-3 text-lg">Signature du stagiaire :</p>
+                    <canvas id="signature-stagiaire" class="border border-gray-400 w-full h-32 rounded-lg bg-white shadow-inner"></canvas>
+                    <button onclick="clearSignature('stagiaire')" class="mt-2 text-sm text-red-500 hover:text-red-700 no-print font-medium">Effacer la signature</button>
+                </div>
+                <div class="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <p class="font-semibold text-gray-700 mb-3 text-lg">Signature du tuteur ou référent :</p>
+                    <canvas id="signature-tuteur" class="border border-gray-400 w-full h-32 rounded-lg bg-white shadow-inner"></canvas>
+                    <button onclick="clearSignature('tuteur')" class="mt-2 text-sm text-red-500 hover:text-red-700 no-print font-medium">Effacer la signature</button>
+                </div>
+            </div>
+            
+        </div> <!-- Fin de la carte professionnelle -->
+
+    </div>
+
+    <!-- Script LocalStorage et Logique de l'application -->
+    <script>
+        // Déclaration des variables globales
+        let signaturePads = {};
+        
+        const BILAN_KEYS = {
+            '1': 'bilan_1', // Décembre
+            '2': 'bilan_2', // Mars
+            '3': 'bilan_3', // Juin
+        };
+
+        const EVALUATION_OPTIONS = {
+            'A': 'Acquis',
+            'E': 'En cours d\'acquisition',
+            'N': 'Non acquis'
+        };
+
+        // Critères généraux de comportement (communs aux 3 bilans)
+        const COMPORTEMENT_GENERAL = [
+            "Ponctualité", 
+            "Assiduité", 
+            "Intégration dans l'équipe", 
+            "Application au travail", 
+            "Initiative - adaptabilité"
+        ];
+
+        // Critères d'ENCADREMENT ET ANIMATION DES ACTIVITES PHYSIQUES ET SPORTIVES
+        // (4 critères initiaux, communs aux bilans 1 et 2)
+        const ENCADREMENT_BASIQUE = [
+            "Gestion du groupe (Prise en main/présentation, explications/consignes, corrections, retour sur séance)",
+            "Gestion de l'animation (Cohérence des animations par rapport au thème, originalité pédagogique/contenu, progression pédagogique, remédiations)",
+            "Gestion de l'environnement (Espace, temps, matériel)",
+            "Gestion personnelle (Attitude: vocabulaire, tenue..., motive et encourage, engagement/positionnement vis-à-vis du groupe, démonstration)"
+        ];
+
+        // Critères avancés (spécifiques au bilan 2)
+        const ENCADREMENT_AVANCE = [
+            "Conception de séance (Structuration de séance, définition des objectifs, description des exercices, explications pour la mise en place des exercices, définition des critères de réussite)",
+            "Analyse de séance (Exposé et justification de son projet de séance, justification des choix des situations proposées par rapport au thème, en relation avec les pratiquants et l'activité, identification des principales caractéristiques du public encadré, apport de solutions aux problèmes rencontrés)"
+        ];
+
+        // Structure complète des bilans
+        const EVALUATION_CRITERIA = {
+            '1': {
+                period: "Septembre - Décembre",
+                description: "Évaluation initiale du comportement et des premières compétences d'encadrement en activités physiques.",
+                sections: [
+                    { title: "COMPORTEMENT GENERAL", criteria: COMPORTEMENT_GENERAL },
+                    { 
+                        title: "ENCADREMENT ET ANIMATION DES ACTIVITES PHYSIQUES ET SPORTIVES", 
+                        criteria: ENCADREMENT_BASIQUE
+                    }
+                ]
+            },
+            '2': {
+                period: "Janvier - Mars",
+                description: "Évaluation intermédiaire, intégrant l'analyse et la conception de séance en plus des critères initiaux.",
+                sections: [
+                    { title: "COMPORTEMENT GENERAL", criteria: COMPORTEMENT_GENERAL },
+                    { 
+                        title: "ENCADREMENT ET ANIMATION DES ACTIVITES PHYSIQUES ET SPORTIVES", 
+                        // Bilan 2 = Bilan 1 + Critères avancés
+                        criteria: [...ENCADREMENT_BASIQUE, ...ENCADREMENT_AVANCE]
+                    }
+                ]
+            },
+            '3': {
+                period: "Avril - Juin",
+                description: "Évaluation finale axée sur l'acquisition des compétences spécifiques du diplôme BPJEPS APT.",
+                sections: [
+                    { title: "COMPORTEMENT GENERAL", criteria: COMPORTEMENT_GENERAL },
+                    { 
+                        title: "COMPETENCES EN TANT QU'EDUCATEUR BPJEPS ACTIVITES PHYSIQUES POUR TOUS", 
+                        subsections: [
+                            { 
+                                subtitle: "ENCADRER TOUT PUBLIC DANS TOUT LIEU ET TOUTE STRUCTURE (UC 1-2)",
+                                criteria: [
+                                    "Communiquer dans les situations de la vie professionnelle",
+                                    "Prendre en compte les caractéristiques des publics dans leurs environnements dans une démarche d'éducation à la citoyenneté",
+                                    "Contribuer au fonctionnement d'une structure"
+                                ]
+                            },
+                            { 
+                                subtitle: "METTRE EN ŒUVRE UN PROJET D'ANIMATION S'INSCRIVANT DANS LE PROJET DE LA STRUCTURE (UC 3)",
+                                criteria: [
+                                    "Concevoir un projet d'animation",
+                                    "Conduire un projet d'animation",
+                                    "Evaluer un projet d'animation"
+                                ]
+                            },
+                            { 
+                                subtitle: "CONDUIRE UNE SEANCE, UN CYCLE D'ANIMATION OU D'APPRENTISSAGE (UC 4)",
+                                criteria: [
+                                    "Concevoir la séance, le cycle d'animation ou d'apprentissage",
+                                    "Conduire la séance, le cycle d'animation ou d'apprentissage",
+                                    "Evaluer la séance, le cycle d'animation ou d'apprentissage"
+                                ]
+                            },
+                            { 
+                                subtitle: "MOBILISER LES TECHNIQUES DE LA MENTION ACTIVITES PHYSIQUES POUR TOUS (UC 5-6-7)",
+                                criteria: [
+                                    "Conduire une séance ou un cycle en utilisant les techniques de la mention",
+                                    "Maîtriser et faire appliquer les règlements de la mention",
+                                    "Garantir des conditions de pratique en sécurité"
+                                ]
+                            }
+                        ] 
+                    }
+                ]
+            }
+        };
+
+        // --- UTILS ---
+        
+        // Fonction pour ajuster automatiquement la hauteur du champ de motivation
+        function autoGrow(element) {
+            // Remet la hauteur à 'auto' pour que scrollHeight reflète la hauteur réelle du contenu
+            element.style.height = 'auto'; 
+            // Définit la hauteur du div à sa hauteur de défilement pour afficher tout le contenu
+            element.style.height = element.scrollHeight + 'px'; 
         }
-    };
-    const columnClasses = { 'J': 'col-j', 'K': 'col-k', 'L': 'col-l' };
-    const publics = ["jeunes_enfants", "enfants", "preados_ados", "adultes", "seniors", "handicap"];
+        window.autoGrow = autoGrow; // Exposer pour l'utiliser dans le HTML
 
-    const STORAGE_KEY_BILAN = 'livret_alternance_bilan_v2_data';
-    const STORAGE_KEY_ACTIVITES = 'livret_alternance_activites_data';
-    let canvasStagiaire, canvasTuteur;
-    
-    function initCanvasRefs() {
-        canvasStagiaire = document.getElementById('canvas-stagiaire');
-        canvasTuteur = document.getElementById('canvas-tuteur');
-    }
+        function showMessage(message, type = 'info') {
+            const box = document.getElementById('message-box');
+            const color = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+            const html = `
+                <div class="${color} text-white p-3 rounded-lg shadow-xl mb-2 transform transition duration-500 ease-out translate-x-0" role="alert">
+                    ${message}
+                </div>
+            `;
+            box.insertAdjacentHTML('beforeend', html);
+            setTimeout(() => {
+                const item = box.lastElementChild;
+                if (item) item.remove();
+            }, 3000);
+        }
 
-    function debounce(func, delay) {
-        let timeoutId;
-        return (...args) => { clearTimeout(timeoutId); timeoutId = setTimeout(() => func.apply(this, args), delay); };
-    }
-    
-    function showMessage(msg, type = 'error') {
-        const messageBox = document.getElementById('message-box');
-        messageBox.textContent = msg;
-        messageBox.className = 'w-full mt-2 text-center text-sm font-medium ';
-        messageBox.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
-        clearTimeout(messageBox.timeoutId);
-        messageBox.timeoutId = setTimeout(() => { messageBox.textContent = ''; }, 4000);
-    }
-    
-    // --- GESTION DES DONNÉES DU BILAN ---
-    function getDataForSave() {
-        const data = { motivations: {}, evaluation: {} };
-        document.querySelectorAll('[contenteditable="true"][data-field]').forEach(el => {
-            const field = el.getAttribute('data-field');
-            const content = el.textContent.trim();
-            data[field] = (!el.classList.contains('empty-field') || content !== '') ? content : '';
-        });
-        document.querySelectorAll('.eval-row').forEach(row => {
-            const uid = row.getAttribute('data-uid');
-            const motivationEl = row.querySelector('[data-field-type="motivation"]');
-            if (motivationEl) data.motivations[uid] = motivationEl.innerText;
-            const checkedCell = row.querySelector('.checkbox-cell.checked');
-            data.evaluation[uid] = checkedCell ? checkedCell.getAttribute('data-score') : null;
-        });
-        data.signatureStagiaire = canvasStagiaire ? canvasStagiaire.toDataURL('image/png') : null;
-        data.signatureTuteur = canvasTuteur ? canvasTuteur.toDataURL('image/png') : null;
-        return data;
-    }
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
 
-    function applyDataToPage(data) {
-        if (!data) return;
-        document.querySelectorAll('[contenteditable="true"][data-field]').forEach(el => {
-            const field = el.getAttribute('data-field');
-            if (data[field] !== undefined) {
-                el.textContent = data[field] || '';
-                el.classList.toggle('empty-field', !data[field]);
+        // --- MODAL LOGIC ---
+        
+        function openFilenameModal() {
+            // 1. Sauvegarder les données avant d'ouvrir la modale
+            saveData();
+            
+            const modal = document.getElementById('filename-modal');
+            const modalContent = document.getElementById('modal-content');
+            const input = document.getElementById('filename-input');
+            
+            // 2. Générer le nom de fichier par défaut
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, ''); 
+            // Sécuriser et formater le nom du stagiaire
+            const stagiaireName = document.getElementById('stagiaire-name').textContent.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '') || 'stagiaire';
+            const defaultFilename = `bilans_alternance_${stagiaireName}_${today}`;
+            
+            input.value = defaultFilename;
+            
+            // 3. Afficher la modale avec animation
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('opacity-0', 'scale-95');
+                modalContent.classList.add('opacity-100', 'scale-100');
+                input.focus();
+            }, 10);
+            
+            // Gérer la touche Entrée pour valider
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performExport();
+                }
+            };
+        }
+        window.openFilenameModal = openFilenameModal;
+
+        function closeFilenameModal() {
+            const modal = document.getElementById('filename-modal');
+            const modalContent = document.getElementById('modal-content');
+
+            // Cacher la modale avec animation
+            modalContent.classList.remove('opacity-100', 'scale-100');
+            modalContent.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            
+            document.getElementById('filename-input').onkeydown = null; // Supprimer l'écouteur Entrée
+        }
+        window.closeFilenameModal = closeFilenameModal;
+
+        function performExport() {
+            const rawFilename = document.getElementById('filename-input').value.trim();
+            closeFilenameModal(); // Fermer la modale
+            
+            // Nettoyage et sécurisation du nom de fichier
+            let safeFilename = rawFilename.replace(/[^a-zA-Z0-9_\-\.]/g, '_').toLowerCase() || 'export_bilans';
+            
+            // Appel de la fonction d'exportation avec le nom souhaité
+            exportData(safeFilename + '.json'); 
+        }
+        window.performExport = performExport;
+        
+        // --- LOCAL STORAGE / DATA PERSISTENCE ---
+
+        function getLocalStorageKey(bilanId) {
+            const docId = BILAN_KEYS[bilanId];
+            // Clé unique et claire pour le localStorage
+            return `bilan_evaluation_${docId}`; 
+        }
+
+        function collectData() {
+            const data = {};
+            // Collecter les informations générales (textContent est vide si le champ est vide)
+            data.stagiaireName = document.getElementById('stagiaire-name').textContent;
+            data.structureName = document.getElementById('structure-name').textContent;
+            data.tuteurName = document.getElementById('tuteur-name').textContent;
+            
+            // Collecter les données d'évaluation
+            data.evaluations = {};
+            document.querySelectorAll('[data-criterion-key]').forEach(el => {
+                const key = el.getAttribute('data-criterion-key');
+                if (key) {
+                    if (!data.evaluations[key]) data.evaluations[key] = {};
+                    
+                    const type = el.getAttribute('data-type');
+                    
+                    if (type === 'notation') {
+                        data.evaluations[key].notation = el.value;
+                    } else if (type === 'motivation') {
+                        data.evaluations[key].motivation = el.textContent.trim();
+                    }
+                }
+            });
+
+            // Collecter les signatures (base64)
+            const canvasStagiaire = document.getElementById('signature-stagiaire');
+            const canvasTuteur = document.getElementById('signature-tuteur');
+
+            // S'assurer que le canvas n'est pas vide avant de récupérer l'URL
+            data.signatureStagiaire = signaturePads.stagiaire && !signaturePads.stagiaire.isEmpty() ? canvasStagiaire.toDataURL() : '';
+            data.signatureTuteur = signaturePads.tuteur && !signaturePads.tuteur.isEmpty() ? canvasTuteur.toDataURL() : '';
+            
+            return data;
+        }
+
+        function saveData() {
+            const bilanId = document.getElementById('bilan-select').value;
+            const key = getLocalStorageKey(bilanId);
+            const data = collectData();
+            
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                // Pas de message de succès pour ne pas interrompre l'utilisateur
+            } catch (e) {
+                console.error("Erreur lors de la sauvegarde LocalStorage:", e);
+                showMessage("Erreur: Échec de la sauvegarde locale des données.", 'error');
             }
-        });
-        document.querySelectorAll('.eval-row').forEach(row => {
-            const uid = row.getAttribute('data-uid');
-            if (data.motivations && data.motivations[uid] !== undefined) {
-                row.querySelector('[data-field-type="motivation"]').innerText = data.motivations[uid];
+        }
+        
+        const debouncedSaveData = debounce(saveData, 1000);
+
+        function loadData(bilanId) {
+            const key = getLocalStorageKey(bilanId);
+            
+            try {
+                const storedData = localStorage.getItem(key);
+                const data = storedData ? JSON.parse(storedData) : null;
+
+                // Appliquer les données
+                applyDataToPage(data || {});
+            } catch (e) {
+                console.error("Erreur lors du chargement LocalStorage:", e);
+                showMessage("Erreur: Échec du chargement des données locales.", 'error');
+                applyDataToPage({}); // Appliquer des données vides en cas d'erreur
             }
-            if (data.evaluation) {
-                const savedScore = data.evaluation[uid];
-                row.querySelectorAll('.checkbox-cell').forEach(cell => {
-                    const isChecked = cell.getAttribute('data-score') === savedScore;
-                    cell.classList.toggle('checked', isChecked);
-                    cell.innerHTML = isChecked ? '<span class="checked-x">X</span>' : '';
+        }
+
+        function applyDataToPage(data) {
+            // Appliquer les informations générales. 
+            document.getElementById('stagiaire-name').textContent = data.stagiaireName || '';
+            document.getElementById('structure-name').textContent = data.structureName || '';
+            document.getElementById('tuteur-name').textContent = data.tuteurName || '';
+
+            // Réinitialiser les notations et motivations avant d'appliquer les nouvelles
+            document.querySelectorAll('[data-criterion-key]').forEach(el => {
+                if (el.tagName === 'SELECT') {
+                    el.value = ''; 
+                } else if (el.getAttribute('data-type') === 'motivation') {
+                    el.textContent = ''; 
+                    // IMPORTANT: Réinitialiser la hauteur
+                    el.style.height = 'auto'; 
+                }
+            });
+
+            // Appliquer les évaluations
+            if (data.evaluations) {
+                Object.entries(data.evaluations).forEach(([key, values]) => {
+                    if (values.notation) {
+                        const notationEl = document.querySelector(`select[data-criterion-key="${key}"][data-type="notation"]`);
+                        if (notationEl) notationEl.value = values.notation;
+                    }
+                    if (values.motivation) {
+                        const motivationEl = document.querySelector(`[data-criterion-key="${key}"][data-type="motivation"]`);
+                        if (motivationEl) {
+                            motivationEl.textContent = values.motivation;
+                            // NOUVEAU: Ajuster la hauteur après avoir mis le texte
+                            autoGrow(motivationEl); 
+                        }
+                    }
                 });
             }
-        });
-        loadSignature('canvas-stagiaire', data.signatureStagiaire);
-        loadSignature('canvas-tuteur', data.signatureTuteur);
-    }
-    
-    const debouncedSaveData = debounce(() => {
-        try {
-            localStorage.setItem(STORAGE_KEY_BILAN, JSON.stringify(getDataForSave()));
-            showMessage("Données du bilan sauvegardées.", 'success');
-        } catch (error) { showMessage("Erreur de sauvegarde du bilan."); }
-    }, 500); 
 
-    // --- GESTION DES DONNÉES DES ACTIVITÉS ---
-    function getActivitesDataForSave() {
-        const data = [];
-        document.querySelectorAll('#activites-table-body tr').forEach(row => {
-            const rowIndex = row.getAttribute('data-row-index');
-            const activityText = row.querySelector(`[data-field="activity-text"]`).textContent.trim();
-            const checkedPublics = [];
-            publics.forEach(p => {
-                const cell = row.querySelector(`.public-cell[data-public="${p}"]`);
-                if (cell && cell.classList.contains('checked')) {
-                    checkedPublics.push(p);
-                }
-            });
-            data.push({ activity: activityText, publics: checkedPublics });
-        });
-        return data;
-    }
-
-    function applyActivitesDataToPage(data) {
-        if (!data || !Array.isArray(data)) return;
-        document.querySelectorAll('#activites-table-body tr').forEach((row, index) => {
-            const rowData = data[index];
-            if (!rowData) return;
-            row.querySelector(`[data-field="activity-text"]`).textContent = rowData.activity || '';
-            publics.forEach(p => {
-                const cell = row.querySelector(`.public-cell[data-public="${p}"]`);
-                const isChecked = rowData.publics && rowData.publics.includes(p);
-                cell.classList.toggle('checked', isChecked);
-                cell.innerHTML = isChecked ? '<span class="checked-x">X</span>' : '';
-                cell.closest('td').style.backgroundColor = isChecked ? '#d1fae5' : '';
-            });
-        });
-    }
-
-    const debouncedSaveActivites = debounce(() => {
-        try {
-            localStorage.setItem(STORAGE_KEY_ACTIVITES, JSON.stringify(getActivitesDataForSave()));
-            showMessage("Données des activités sauvegardées.", 'success');
-        } catch (error) { showMessage("Erreur de sauvegarde des activités."); }
-    }, 500);
-
-    // --- GÉNÉRATION DES TABLEAUX ---
-    function generateEvaluationTable() {
-        const createRow = (text, uid) => `
-            <tr class="eval-row hover:bg-gray-50" data-uid="${uid}">
-                <td class="criteria-text">${text}</td>
-                <td class="col-eval checkbox-cell ${columnClasses.J}" data-score="J" onclick="toggleScore(this)"></td>
-                <td class="col-eval checkbox-cell ${columnClasses.K}" data-score="K" onclick="toggleScore(this)"></td>
-                <td class="col-eval checkbox-cell ${columnClasses.L}" data-score="L" onclick="toggleScore(this)"></td>
-                <td><div contenteditable="true" data-field-type="motivation" class="w-full min-h-[30px] text-gray-700 text-xs p-1 motivation-field" data-placeholder="Avis du tuteur ici"></div></td>
-            </tr>`;
-        
-        document.getElementById('comportement-body').innerHTML = criteria.comportement.map((crit, i) => createRow(crit, `comp-${i}`)).join('');
-        Object.keys(criteria.competences).forEach(ucKey => {
-            const uc = criteria.competences[ucKey];
-            document.getElementById(`competences-${ucKey}-body`).innerHTML = uc.list.map((crit, i) => createRow(crit, `${ucKey}-${i}`)).join('');
-        });
-    }
-    
-    function generateActivitesTable() {
-        const tableBody = document.getElementById('activites-table-body');
-        let html = '';
-        for (let i = 0; i < 5; i++) {
-            html += `<tr data-row-index="${i}">
-                <td><div contenteditable="true" data-field="activity-text" data-placeholder="Décrire l'activité..." class="w-full p-1 empty-field"></div></td>
-                ${publics.map(p => `<td class="text-center"><div class="public-cell checkbox-cell" data-public="${p}" onclick="togglePublic(this)"></div></td>`).join('')}
-            </tr>`;
-        }
-        tableBody.innerHTML = html;
-        tableBody.addEventListener('input', (e) => {
-             if (e.target.getAttribute('data-field') === 'activity-text') {
-                e.target.classList.toggle('empty-field', e.target.textContent.trim() === '');
-                debouncedSaveActivites();
-             }
-        });
-    }
-
-    window.toggleScore = function(cell) {
-        const row = cell.closest('.eval-row');
-        if (cell.classList.contains('checked')) {
-            cell.classList.remove('checked');
-            cell.innerHTML = '';
-        } else {
-            row.querySelectorAll('.checkbox-cell').forEach(c => { c.classList.remove('checked'); c.innerHTML = ''; });
-            cell.classList.add('checked');
-            cell.innerHTML = '<span class="checked-x">X</span>';
-        }
-        debouncedSaveData();
-    }
-
-    window.togglePublic = function(cell) {
-        const isChecked = cell.classList.toggle('checked');
-        cell.innerHTML = isChecked ? '<span class="checked-x">X</span>' : '';
-        cell.closest('td').style.backgroundColor = isChecked ? '#d1fae5' : '';
-        debouncedSaveActivites();
-    }
-
-    // --- SIGNATURES ---
-    function loadSignature(canvasId, base64) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas || !base64) return;
-        const ctx = canvas.getContext('2d');
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        img.src = base64;
-    }
-
-    window.clearCanvas = (id) => {
-        const canvas = document.getElementById(id);
-        if(canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        debouncedSaveData(); 
-    }
-
-    function setupSignaturePads() {
-        initCanvasRefs();
-        [canvasStagiaire, canvasTuteur].forEach(canvas => {
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let isDrawing = false, lastX = 0, lastY = 0;
-
-            const setCanvasSize = () => {
-                const dataUrl = canvas.toDataURL();
-                canvas.width = canvas.parentElement.clientWidth;
-                canvas.height = canvas.parentElement.clientHeight;
-                ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
-                loadSignature(canvas.id, dataUrl);
-            };
-            setCanvasSize();
-
-            const getPos = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return [clientX - rect.left, clientY - rect.top];
-            };
-            const start = (e) => { isDrawing = true; [lastX, lastY] = getPos(e); e.preventDefault(); };
-            const draw = (e) => { if (!isDrawing) return; const [x, y] = getPos(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke(); [lastX, lastY] = [x, y]; };
-            const stop = () => { if (isDrawing) { isDrawing = false; debouncedSaveData(); } };
+            // Le setup des pads DOIT être fait avant d'appliquer les signatures
+            setupSignaturePads(); 
             
-            canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseout', stop);
-            canvas.addEventListener('touchstart', start, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            canvas.addEventListener('touchend', stop);
-            window.addEventListener('resize', debounce(setCanvasSize, 250));
-        });
-    }
+            // Appliquer les signatures
+            applySignature(document.getElementById('signature-stagiaire'), data.signatureStagiaire);
+            applySignature(document.getElementById('signature-tuteur'), data.signatureTuteur);
+        }
 
-    // --- MODALS ---
-    window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; }
-    window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; }
-    window.launchPrint = () => { closeModal('pdf-modal'); setTimeout(() => window.print(), 100); }
-    
-    // --- EXPORT / IMPORT GLOBAL ---
-    function exportAllData() {
-        const filename = prompt("Veuillez nommer votre fichier de sauvegarde :", `sauvegarde-livret-${new Date().toISOString().split('T')[0]}.json`);
-        if (!filename) return;
+        // --- DYNAMIC CONTENT GENERATION ---
 
-        const allData = { suivi: {}, bilan: null, activites: null };
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith('livret_alternance_data_')) {
-                allData.suivi[key] = JSON.parse(localStorage.getItem(key));
+        function generateEvaluationTable() {
+            const bilanSelect = document.getElementById('bilan-select');
+            const bilanId = bilanSelect.value;
+            const bilan = EVALUATION_CRITERIA[bilanId];
+            const contentDiv = document.getElementById('bilan-content');
+            
+            if (!bilan) {
+                contentDiv.innerHTML = '<p class="text-red-500">Erreur: Critères de bilan non trouvés.</p>';
+                return;
+            }
+
+            // Mise à jour de la période affichée
+            document.getElementById('bilan-period').textContent = `Période : ${bilan.period}`;
+
+            let html = `<h3 class="bilan-header">BILAN ${bilanId} : ${bilan.description}</h3>`;
+
+            bilan.sections.forEach((section, sectionIndex) => {
+                html += `
+                    <h4 class="text-xl font-bold text-gray-800 mt-6 mb-3">${sectionIndex + 1}. ${section.title}</h4>
+                    <table class="evaluation-table mb-8 rounded-lg overflow-hidden shadow-lg border border-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="w-2/5">CRITÈRES</th>
+                                <th class="w-1/12 text-center whitespace-nowrap">NOTATION</th>
+                                <th class="w-7/12">MOTIVATION DE L'ÉVALUATION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                // Gérer les sous-sections spécifiques au Bilan 3
+                if (section.subsections) {
+                    section.subsections.forEach((subsection, subIndex) => {
+                        html += `
+                            <tr>
+                                <td colspan="3" class="subsection-title">${subsection.subtitle}</td>
+                            </tr>
+                        `;
+                        subsection.criteria.forEach((criterion, criterionIndex) => {
+                            // Clé unique pour le critère: BilanID-SectionIndex-SubsectionIndex-CriterionIndex
+                            const key = `B${bilanId}-S${sectionIndex + 1}-SS${subIndex + 1}-C${criterionIndex + 1}`;
+                            html += createCriterionRow(key, criterion);
+                        });
+                    });
+                } else {
+                    // Gérer les critères standards (Bilan 1 & 2)
+                    section.criteria.forEach((criterion, criterionIndex) => {
+                        // Clé unique pour le critère: BilanID-SectionIndex-CriterionIndex
+                        const key = `B${bilanId}-S${sectionIndex + 1}-C${criterionIndex + 1}`;
+                        html += createCriterionRow(key, criterion);
+                    });
+                }
+
+                html += `</tbody></table>`;
+            });
+            
+            contentDiv.innerHTML = html;
+            
+            // Assurer que les événements de sauvegarde sont attachés après la régénération du contenu
+            document.querySelectorAll('select[data-type="notation"]').forEach(select => {
+                select.removeEventListener('change', debouncedSaveData); 
+                select.addEventListener('change', debouncedSaveData);
+            });
+            document.querySelectorAll('[data-type="motivation"]').forEach(div => {
+                div.removeEventListener('input', debouncedSaveData);
+                // Ajouter l'écouteur pour l'auto-adaptation EN PLUS de la sauvegarde
+                div.addEventListener('input', (e) => {
+                    autoGrow(e.target);
+                    debouncedSaveData();
+                });
+            });
+            
+            // Recharger les données pour que les valeurs apparaissent dans les nouvelles tables
+            loadData(bilanId); 
+        }
+
+        function createCriterionRow(key, criterionText) {
+            // Options de notation
+            const optionsHtml = Object.keys(EVALUATION_OPTIONS).map(val => 
+                `<option value="${val}">${EVALUATION_OPTIONS[val]}</option>`
+            ).join('');
+            
+            return `
+                <tr>
+                    <td class="font-medium text-gray-700 w-2/5">${criterionText}</td>
+                    <td class="text-center w-1/12">
+                        <!-- Select stylisé -->
+                        <select data-criterion-key="${key}" data-type="notation" class="p-2 border border-gray-300 rounded-lg focus:ring-blue-700 focus:border-blue-700 text-sm shadow-sm transition duration-150 bg-white hover:border-blue-500">
+                            <option value="">-- Choisir --</option>
+                            ${optionsHtml}
+                        </select>
+                    </td>
+                    <td class="w-7/12">
+                        <!-- Champ de motivation éditable et auto-adaptable -->
+                        <div data-criterion-key="${key}" data-type="motivation" contenteditable="true" 
+                             data-placeholder="Saisissez votre avis motivé ici..." 
+                             class="w-full text-gray-700 auto-grow-motivation"></div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // --- SIGNATURE PAD LOGIC ---
+
+        function setupSignaturePads() {
+            // Initialiser les pads uniquement s'ils n'existent pas ou sont à reconfigurer
+            const canvasStagiaire = document.getElementById('signature-stagiaire');
+            const canvasTuteur = document.getElementById('signature-tuteur');
+            
+            // Redimensionner le canvas pour qu'il corresponde à son élément
+            function resizeCanvas(canvas) {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                // Si pad existe, il faut reconfigurer le contexte de dessin
+                if (signaturePads.stagiaire && canvas === canvasStagiaire) signaturePads.stagiaire.clear();
+                if (signaturePads.tuteur && canvas === canvasTuteur) signaturePads.tuteur.clear();
+                canvas.getContext('2d').scale(ratio, ratio);
+            }
+
+            if (typeof SignaturePad === 'undefined') {
+                // Utiliser un chargement synchrone minimal pour éviter l'erreur si le script n'est pas encore évalué.
+                return;
+            }
+            
+            // Si les pads ne sont pas encore initialisés
+            if (!signaturePads.stagiaire) {
+                [canvasStagiaire, canvasTuteur].forEach(canvas => {
+                    resizeCanvas(canvas);
+                });
+
+                signaturePads.stagiaire = new SignaturePad(canvasStagiaire, {
+                    backgroundColor: 'rgb(255, 255, 255)',
+                    penColor: 'rgb(0, 0, 0)',
+                    onEnd: debouncedSaveData
+                });
+                signaturePads.tuteur = new SignaturePad(canvasTuteur, {
+                    backgroundColor: 'rgb(255, 255, 255)',
+                    penColor: 'rgb(0, 0, 0)',
+                    onEnd: debouncedSaveData
+                });
+            }
+            
+            // Gérer le redimensionnement (mis à jour pour plus de robustesse)
+            if (!window._signatureResizeListener) {
+                window._signatureResizeListener = () => {
+                    const currentStagiaireSig = signaturePads.stagiaire && !signaturePads.stagiaire.isEmpty() ? signaturePads.stagiaire.toDataURL() : null;
+                    const currentTuteurSig = signaturePads.tuteur && !signaturePads.tuteur.isEmpty() ? signaturePads.tuteur.toDataURL() : null;
+
+                    // Redimensionner et clear les pads (car le redimensionnement du canvas le vide)
+                    [canvasStagiaire, canvasTuteur].forEach(canvas => {
+                        resizeCanvas(canvas); 
+                    });
+                    
+                    // Restaurer les signatures
+                    if(currentStagiaireSig && signaturePads.stagiaire) {
+                        signaturePads.stagiaire.fromDataURL(currentStagiaireSig, { ratio: Math.max(window.devicePixelRatio || 1, 1) });
+                    }
+                    if(currentTuteurSig && signaturePads.tuteur) {
+                         signaturePads.tuteur.fromDataURL(currentTuteurSig, { ratio: Math.max(window.devicePixelRatio || 1, 1) });
+                    }
+                };
+                window.addEventListener('resize', window._signatureResizeListener);
             }
         }
-        allData.bilan = JSON.parse(localStorage.getItem(STORAGE_KEY_BILAN));
-        allData.activites = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVITES));
+
+        function clearSignature(type) {
+            if (signaturePads[type]) {
+                signaturePads[type].clear();
+                debouncedSaveData();
+            }
+        }
+        window.clearSignature = clearSignature; // Exposer la fonction
+
+        function applySignature(canvas, base64Image) {
+            const type = canvas.id.replace('signature-', '');
+            const pad = signaturePads[type];
+            
+            if (!pad) return;
+
+            if (!base64Image || base64Image.length < 50) {
+                pad.clear();
+                return;
+            }
+
+            if (typeof pad.fromDataURL === 'function') {
+                // Restaurer l'image en tenant compte du ratio de pixel pour la qualité
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                pad.fromDataURL(base64Image, { ratio: ratio }); 
+            }
+        }
         
-        const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = filename.endsWith('.json') ? filename : `${filename}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        showMessage('Exportation complète réussie !', 'success');
-    }
+        // --- EXPORT / IMPORT LOGIC (LocalStorage Version) ---
 
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (!data.suivi && !data.bilan) throw new Error("Format invalide");
+        // Mise à jour de la fonction exportData pour accepter le nom de fichier
+        function exportData(fileName) {
+            // Sauvegarder les données actuelles en LocalStorage avant l'export
+            saveData(); 
 
-                Object.keys(data.suivi || {}).forEach(key => localStorage.setItem(key, JSON.stringify(data.suivi[key])));
-                if (data.bilan) localStorage.setItem(STORAGE_KEY_BILAN, JSON.stringify(data.bilan));
-                if (data.activites) localStorage.setItem(STORAGE_KEY_ACTIVITES, JSON.stringify(data.activites));
+            const allData = {};
+            // Itérer sur TOUS les bilans pour tout exporter
+            for (const [bilanId, docId] of Object.entries(BILAN_KEYS)) {
+                const key = getLocalStorageKey(bilanId);
+                const storedData = localStorage.getItem(key);
+
+                if (storedData) {
+                    // Utiliser le docId comme clé de haut niveau pour l'importation
+                    allData[docId] = JSON.parse(storedData);
+                }
+            }
+
+            const dataStr = JSON.stringify(allData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Utiliser le nom de fichier fourni par l'utilisateur
+            const finalFileName = fileName || 'bilans_alternance.json';
+            
+            a.download = finalFileName; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showMessage(`Tous les 3 bilans ont été exportés dans le fichier : ${finalFileName}`, 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    // Itérer sur les données importées pour les sauvegarder une par une dans LocalStorage
+                    for (const [docId, data] of Object.entries(importedData)) {
+                        // Chercher l'ID de bilan correspondant (ex: 'bilan_1' -> '1')
+                        const bilanId = Object.keys(BILAN_KEYS).find(key => BILAN_KEYS[key] === docId);
+                        
+                        if (bilanId) {
+                            const key = getLocalStorageKey(bilanId);
+                            localStorage.setItem(key, JSON.stringify(data));
+                            importedCount++;
+                        } else {
+                            console.warn(`Données ignorées pour l'ID de document inconnu: ${docId}`);
+                        }
+                    }
+                    
+                    // Recharger le bilan actuellement affiché pour voir les changements
+                    // La régénération de la table appelle loadData à la fin
+                    generateEvaluationTable(); 
+                    
+                    showMessage(`Importation réussie ! ${importedCount} bilan(s) mis à jour.`, 'success');
+                } catch (error) { 
+                    console.error("Erreur lors de l'importation:", error);
+                    showMessage('Erreur: Fichier JSON invalide ou corrompu. Assurez-vous d\'importer le fichier JSON précédemment exporté.'); 
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Réinitialiser l'input file
+        }
+        window.importData = importData; // Exposer la fonction
+
+        // --- INITIALISATION ---
+        
+        function initApp() {
+            // Listener pour le changement de bilan
+            const bilanSelect = document.getElementById('bilan-select');
+            bilanSelect.addEventListener('change', (e) => {
+                // La régénération de la table appelle loadData à la fin
+                generateEvaluationTable();
+            });
+            
+            // Listener global pour la sauvegarde auto sur les champs éditables (infos générales)
+            document.getElementById('app').addEventListener('input', (e) => {
+                const isEditableField = e.target.closest('[contenteditable="true"]');
                 
-                showMessage('Importation réussie ! La page va se recharger.', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } catch (error) { showMessage('Erreur: Fichier invalide ou corrompu.'); }
-        };
-        reader.readAsText(file);
-        event.target.value = ''; // Reset file input
-    }
-    
-    // --- INITIALISATION ---
-    function initApp() {
-        generateEvaluationTable();
-        generateActivitesTable();
-        setupSignaturePads();
-        
-        // Chargement des données
-        try {
-            const bilanData = JSON.parse(localStorage.getItem(STORAGE_KEY_BILAN));
-            if (bilanData) applyDataToPage(bilanData);
-            const activitesData = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVITES));
-            if (activitesData) applyActivitesDataToPage(activitesData);
-        } catch (e) { console.error("Erreur au chargement des données initiales", e); }
-        
-        // Listeners pour sauvegarde auto
-        document.getElementById('app').addEventListener('input', (e) => {
-            if (e.target.closest('[contenteditable]')) {
-                if (e.target.closest('#activites-table-body')) {
-                    // géré par le listener de la table activités
-                } else {
+                // Ne sauvegarder que si c'est un champ éditable qui n'est pas dans le tableau d'évaluation
+                if (isEditableField && !e.target.closest('.evaluation-table')) { 
                     debouncedSaveData();
                 }
-            }
-        });
-    }
+            });
+            
+            // Initialiser le premier bilan (Bilan 1 par défaut)
+            generateEvaluationTable(); 
+        }
 
-    window.onload = initApp;
-</script>
+        // Exiger l'ajout de la librairie Signature Pad pour les signatures
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js';
+        script.onload = () => {
+            initApp();
+        };
+        document.head.appendChild(script);
+
+    </script>
 </body>
-</html>
 
+</html>
