@@ -81,29 +81,67 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 0.25rem; /* espace entre les cases */
+            gap: 0.5rem; /* espace plus généreux entre les cases */
         }
 
-        /* Case individuelle de notation */
+        /* Case individuelle de notation
+           Les cases sont maintenant suffisamment larges pour afficher le libellé (Acquis, En cours, Non acquis).
+           Elles sont colorées par défaut et contiennent un indicateur de sélection (croix) positionné dans le coin supérieur droit. */
         .notation-box {
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid #d1d5db; /* gris clair */
-            border-radius: 4px;
-            font-size: 0.9rem;
-            line-height: 1;
-            font-weight: 700;
-            display: flex;
+            position: relative;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: #1f2937; /* gris foncé par défaut */
-            position: relative;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            min-width: 6rem;
+            height: auto;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1;
+            color: #1f2937;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
         }
 
-        /* Afficher une croix (✕) seulement quand sélectionné */
+        /* Effet de survol pour donner du relief */
+        .notation-box:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /*
+         * Coloration par défaut des cases de notation
+         * afin que la première case apparaisse en vert, la seconde en orange
+         * et la troisième en rouge avant même qu'une sélection ne soit effectuée.
+         * Les classes "selected-" existantes renforcent ces couleurs et affichent
+         * le symbole "✕" lorsque l'utilisateur clique sur une case.
+         */
+        .notation-box[data-value="A"] {
+            background-color: #dcfce7; /* vert très clair */
+            border-color: #16a34a;     /* vert */
+            color: #065f46;            /* vert foncé */
+        }
+        .notation-box[data-value="E"] {
+            background-color: #fef9c3; /* jaune très clair / orange pâle */
+            border-color: #f59e0b;     /* orange */
+            color: #b45309;            /* orange foncé */
+        }
+        .notation-box[data-value="N"] {
+            background-color: #fee2e2; /* rouge très clair */
+            border-color: #ef4444;     /* rouge */
+            color: #991b1b;            /* rouge foncé */
+        }
+
+        /* Afficher une croix (✕) seulement quand sélectionné.
+           La croix est positionnée en haut à droite pour ne pas masquer le texte. */
         .notation-box::after {
             content: '';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 0.9rem;
         }
         .notation-box.selected-A::after,
         .notation-box.selected-E::after,
@@ -396,6 +434,23 @@
     <img src="cd2000.jpeg" alt="Logo CD 2000" class="h-24 object-contain">
     <img src="idsf.png" alt="Logo IDSF" class="h-24 object-contain">
 </div>
+            <!-- Légende des codes couleur pour la notation (Acquis / En cours d'acquisition / Non acquis) -->
+            <div class="legend-container my-6">
+                <p class="text-center font-semibold mb-2">Rappel des codes couleur et de leur signification&nbsp;:</p>
+                <table class="w-full text-center border border-gray-300 rounded-lg overflow-hidden text-sm">
+                    <tr>
+                        <td class="font-bold border border-gray-300 p-2 bg-gray-50" rowspan="2">Niveaux de<br>Maîtrise</td>
+                        <td class="border border-gray-300 p-3 bg-green-500 text-white font-bold">Acquis<br><span class="text-xs font-normal">Toujours acquis</span></td>
+                        <td class="border border-gray-300 p-3 bg-yellow-400 text-gray-800 font-bold">En cours d’acquisition<br><span class="text-xs font-normal">Parfois acquis</span></td>
+                        <td class="border border-gray-300 p-3 bg-red-500 text-white font-bold">Non acquis<br><span class="text-xs font-normal">Jamais acquis</span></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-bold">20</td>
+                        <td class="border border-gray-300 p-2 font-bold">10</td>
+                        <td class="border border-gray-300 p-2 font-bold">4</td>
+                    </tr>
+                </table>
+            </div>
             <div id="bilan-content">
                 <!-- Le contenu du bilan (tables) sera généré ici par JavaScript -->
                 <p class="text-center text-gray-500 py-10">Chargement des critères d'évaluation...</p>
@@ -519,7 +574,9 @@
                         title: "COMPETENCES EN TANT QU'EDUCATEUR BPJEPS ACTIVITES PHYSIQUES POUR TOUS", 
                         subsections: [
                             { 
-                                subtitle: "ENCADRER TOUT PUBLIC DANS TOUT LIEU ET TOUTE STRUCTURE (UC 1-2)",
+                                // Correction des correspondances d'unités capitalisables (UC) pour le Bilan 3 :
+                                // L'encadrement tout public relève uniquement de l'UC 1
+                                subtitle: "ENCADRER TOUT PUBLIC DANS TOUT LIEU ET TOUTE STRUCTURE (UC 1)",
                                 criteria: [
                                     "Communiquer dans les situations de la vie professionnelle",
                                     "Prendre en compte les caractéristiques des publics dans leurs environnements dans une démarche d'éducation à la citoyenneté",
@@ -527,7 +584,8 @@
                                 ]
                             },
                             { 
-                                subtitle: "METTRE EN ŒUVRE UN PROJET D'ANIMATION S'INSCRIVANT DANS LE PROJET DE LA STRUCTURE (UC 3)",
+                                // La mise en œuvre d'un projet d'animation correspond à l'UC 2
+                                subtitle: "METTRE EN ŒUVRE UN PROJET D'ANIMATION S'INSCRIVANT DANS LE PROJET DE LA STRUCTURE (UC 2)",
                                 criteria: [
                                     "Concevoir un projet d'animation",
                                     "Conduire un projet d'animation",
@@ -535,7 +593,8 @@
                                 ]
                             },
                             { 
-                                subtitle: "CONDUIRE UNE SEANCE, UN CYCLE D'ANIMATION OU D'APPRENTISSAGE (UC 4)",
+                                // La conduite d'une séance ou d'un cycle d'animation correspond à l'UC 3
+                                subtitle: "CONDUIRE UNE SEANCE, UN CYCLE D'ANIMATION OU D'APPRENTISSAGE (UC 3)",
                                 criteria: [
                                     "Concevoir la séance, le cycle d'animation ou d'apprentissage",
                                     "Conduire la séance, le cycle d'animation ou d'apprentissage",
@@ -543,7 +602,8 @@
                                 ]
                             },
                             { 
-                                subtitle: "MOBILISER LES TECHNIQUES DE LA MENTION ACTIVITES PHYSIQUES POUR TOUS (UC 5-6-7)",
+                                // La mobilisation des techniques de la mention APT correspond désormais à l'UC 4
+                                subtitle: "MOBILISER LES TECHNIQUES DE LA MENTION ACTIVITES PHYSIQUES POUR TOUS (UC 4)",
                                 criteria: [
                                     "Conduire une séance ou un cycle en utilisant les techniques de la mention",
                                     "Maîtriser et faire appliquer les règlements de la mention",
@@ -819,7 +879,8 @@
                         <thead>
                             <tr>
                                 <th class="w-2/5">CRITÈRES</th>
-                                <th class="w-1/12 text-center whitespace-nowrap">NOTATION</th>
+                                <!-- La colonne Notation n'a plus de largeur fixe afin d'accueillir des libellés complets -->
+                                <th class="text-center whitespace-nowrap">NOTATION</th>
                                 <th class="w-7/12">MOTIVATION DE L'ÉVALUATION</th>
                             </tr>
                         </thead>
@@ -875,11 +936,12 @@
             return `
                 <tr>
                     <td class="font-medium text-gray-700 w-2/5">${criterionText}</td>
-                    <td class="text-center w-1/12">
+                    <td class="text-center">
                         <div class="notation-control" data-criterion-key="${key}" data-type="notation" data-selected="">
-                            <div class="notation-box" data-value="A" title="${EVALUATION_OPTIONS['A']}"></div>
-                            <div class="notation-box" data-value="E" title="${EVALUATION_OPTIONS['E']}"></div>
-                            <div class="notation-box" data-value="N" title="${EVALUATION_OPTIONS['N']}"></div>
+                            <!-- Les cases comportent désormais un texte pour mieux identifier les niveaux -->
+                            <div class="notation-box" data-value="A" title="${EVALUATION_OPTIONS['A']}">Acquis</div>
+                            <div class="notation-box" data-value="E" title="${EVALUATION_OPTIONS['E']}">En&nbsp;cours</div>
+                            <div class="notation-box" data-value="N" title="${EVALUATION_OPTIONS['N']}">Non acquis</div>
                         </div>
                     </td>
                     <td class="w-7/12">
