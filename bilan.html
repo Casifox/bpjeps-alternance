@@ -72,6 +72,66 @@
             word-break: break-all;
         }
 
+        /* ---------------------------------------------------------------------- */
+        /* --- NOUVEAU SYSTÈME DE NOTATION PAR CROIX (sans menu déroulant) ---   */
+        /* ---------------------------------------------------------------------- */
+
+        /* Conteneur des cases de notation. Aligne horizontalement les 3 cases A, E, N */
+        .notation-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.25rem; /* espace entre les cases */
+        }
+
+        /* Case individuelle de notation */
+        .notation-box {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid #d1d5db; /* gris clair */
+            border-radius: 4px;
+            font-size: 0.9rem;
+            line-height: 1;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #1f2937; /* gris foncé par défaut */
+            position: relative;
+        }
+
+        /* Afficher une croix (✕) seulement quand sélectionné */
+        .notation-box::after {
+            content: '';
+        }
+        .notation-box.selected-A::after,
+        .notation-box.selected-E::after,
+        .notation-box.selected-N::after {
+            content: '✕';
+        }
+
+        /* État sélectionné pour "Acquis" */
+        .notation-box.selected-A {
+            background-color: #dcfce7; /* vert très clair */
+            border-color: #16a34a;     /* vert */
+            color: #065f46;            /* vert foncé */
+        }
+
+        /* État sélectionné pour "En cours d'acquisition" */
+        .notation-box.selected-E {
+            background-color: #fef9c3; /* jaune très clair / orange pâle */
+            border-color: #f59e0b;     /* orange */
+            color: #b45309;            /* orange foncé */
+        }
+
+        /* État sélectionné pour "Non acquis" */
+        .notation-box.selected-N {
+            background-color: #fee2e2; /* rouge très clair */
+            border-color: #ef4444;     /* rouge */
+            color: #991b1b;            /* rouge foncé */
+        }
+
 
         /* Styles de la table d'évaluation */
         .evaluation-table {
@@ -344,7 +404,7 @@
             <!-- Section Stagiaire/Tuteur -->
             <div class="mt-10 pt-6 border-t border-gray-300">
                 <p class="text-sm mb-6 italic alert-box">
-                    Veuillez sélectionner le niveau d'acquisition des compétences (**Acquis** / **En cours d'acquisition** / **Non acquis**) et accompagner la notation d'un avis motivé.
+                    Veuillez sélectionner le niveau d'acquisition des compétences via les cases colorées (vert&nbsp;=&nbsp;<strong>Acquis</strong>, orange&nbsp;=&nbsp;<strong>En cours d'acquisition</strong>, rouge&nbsp;=&nbsp;<strong>Non acquis</strong>) et accompagner la notation d'un avis motivé.
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-base">
@@ -618,7 +678,14 @@
                     const type = el.getAttribute('data-type');
                     
                     if (type === 'notation') {
-                        data.evaluations[key].notation = el.value;
+                        // Pour le nouveau système de notation, la valeur est stockée soit dans la propriété .value, soit dans l'attribut data-selected
+                        let notationValue = '';
+                        if (typeof el.value !== 'undefined' && el.value !== null) {
+                            notationValue = el.value;
+                        } else if (el.getAttribute('data-selected')) {
+                            notationValue = el.getAttribute('data-selected');
+                        }
+                        data.evaluations[key].notation = notationValue;
                     } else if (type === 'motivation') {
                         data.evaluations[key].motivation = el.textContent.trim();
                     }
@@ -676,12 +743,21 @@
 
             // Réinitialiser les notations et motivations avant d'appliquer les nouvelles
             document.querySelectorAll('[data-criterion-key]').forEach(el => {
-                if (el.tagName === 'SELECT') {
-                    el.value = ''; 
-                } else if (el.getAttribute('data-type') === 'motivation') {
-                    el.textContent = ''; 
+                const type = el.getAttribute('data-type');
+                // Réinitialiser les notations (ancien sélecteur ou nouveau système)
+                if (type === 'notation') {
+                    if (el.tagName === 'SELECT') {
+                        // Ancien cas : menu déroulant
+                        el.value = '';
+                    } else if (el.classList.contains('notation-control')) {
+                        // Nouveau cas : système de cases à cocher
+                        setNotationControlValue(el, '');
+                    }
+                } else if (type === 'motivation') {
+                    // Réinitialiser le champ de motivation
+                    el.textContent = '';
                     // IMPORTANT: Réinitialiser la hauteur
-                    el.style.height = 'auto'; 
+                    el.style.height = 'auto';
                 }
             });
 
@@ -689,15 +765,22 @@
             if (data.evaluations) {
                 Object.entries(data.evaluations).forEach(([key, values]) => {
                     if (values.notation) {
-                        const notationEl = document.querySelector(`select[data-criterion-key="${key}"][data-type="notation"]`);
-                        if (notationEl) notationEl.value = values.notation;
+                        // Vérifier d'abord le nouveau système de notation
+                        let notationControl = document.querySelector(`.notation-control[data-criterion-key="${key}"][data-type="notation"]`);
+                        if (notationControl) {
+                            setNotationControlValue(notationControl, values.notation);
+                        } else {
+                            // Ancien cas (fallback) : menu déroulant
+                            const notationEl = document.querySelector(`select[data-criterion-key="${key}"][data-type="notation"]`);
+                            if (notationEl) notationEl.value = values.notation;
+                        }
                     }
                     if (values.motivation) {
                         const motivationEl = document.querySelector(`[data-criterion-key="${key}"][data-type="motivation"]`);
                         if (motivationEl) {
                             motivationEl.textContent = values.motivation;
-                            // NOUVEAU: Ajuster la hauteur après avoir mis le texte
-                            autoGrow(motivationEl); 
+                            // Ajuster la hauteur après avoir mis le texte
+                            autoGrow(motivationEl);
                         }
                     }
                 });
@@ -771,48 +854,103 @@
             
             contentDiv.innerHTML = html;
             
-            // Assurer que les événements de sauvegarde sont attachés après la régénération du contenu
-            document.querySelectorAll('select[data-type="notation"]').forEach(select => {
-                select.removeEventListener('change', debouncedSaveData); 
-                select.addEventListener('change', debouncedSaveData);
-            });
+            // Attacher les événements de saisie sur les champs de motivation
             document.querySelectorAll('[data-type="motivation"]').forEach(div => {
                 div.removeEventListener('input', debouncedSaveData);
-                // Ajouter l'écouteur pour l'auto-adaptation EN PLUS de la sauvegarde
                 div.addEventListener('input', (e) => {
                     autoGrow(e.target);
                     debouncedSaveData();
                 });
             });
-            
+
+            // Initialiser les gestionnaires pour le nouveau système de notation
+            attachNotationHandlers();
+
             // Recharger les données pour que les valeurs apparaissent dans les nouvelles tables
-            loadData(bilanId); 
+            loadData(bilanId);
         }
 
         function createCriterionRow(key, criterionText) {
-            // Options de notation
-            const optionsHtml = Object.keys(EVALUATION_OPTIONS).map(val => 
-                `<option value="${val}">${EVALUATION_OPTIONS[val]}</option>`
-            ).join('');
-            
+            // Nouveau système: 3 cases de notation (Acquis, En cours d'acquisition, Non acquis)
             return `
                 <tr>
                     <td class="font-medium text-gray-700 w-2/5">${criterionText}</td>
                     <td class="text-center w-1/12">
-                        <!-- Select stylisé -->
-                        <select data-criterion-key="${key}" data-type="notation" class="p-2 border border-gray-300 rounded-lg focus:ring-blue-700 focus:border-blue-700 text-sm shadow-sm transition duration-150 bg-white hover:border-blue-500">
-                            <option value="">-- Choisir --</option>
-                            ${optionsHtml}
-                        </select>
+                        <div class="notation-control" data-criterion-key="${key}" data-type="notation" data-selected="">
+                            <div class="notation-box" data-value="A" title="${EVALUATION_OPTIONS['A']}"></div>
+                            <div class="notation-box" data-value="E" title="${EVALUATION_OPTIONS['E']}"></div>
+                            <div class="notation-box" data-value="N" title="${EVALUATION_OPTIONS['N']}"></div>
+                        </div>
                     </td>
                     <td class="w-7/12">
                         <!-- Champ de motivation éditable et auto-adaptable -->
-                        <div data-criterion-key="${key}" data-type="motivation" contenteditable="true" 
-                             data-placeholder="Saisissez votre avis motivé ici..." 
+                        <div data-criterion-key="${key}" data-type="motivation" contenteditable="true"
+                             data-placeholder="Saisissez votre avis motivé ici..."
                              class="w-full text-gray-700 auto-grow-motivation"></div>
                     </td>
                 </tr>
             `;
+        }
+
+        /**
+         * Initialise les écouteurs sur les nouvelles cases de notation.
+         * Chaque case correspond à une valeur (A, E ou N) et le clic met à jour
+         * l'état sélectionné, applique la classe de couleur appropriée et
+         * définit la propriété .value du conteneur. Une sauvegarde différée
+         * est déclenchée via debouncedSaveData().
+         */
+        function attachNotationHandlers() {
+            // Sélectionner tous les conteneurs de notation dans le tableau
+            document.querySelectorAll('.notation-control').forEach(control => {
+                const boxes = Array.from(control.querySelectorAll('.notation-box'));
+                // Initialiser la valeur si elle n'existe pas
+                if (typeof control.value === 'undefined') {
+                    control.value = '';
+                }
+                boxes.forEach(box => {
+                    box.addEventListener('click', () => {
+                        const val = box.getAttribute('data-value');
+                        // Nettoyer les classes sélectionnées
+                        boxes.forEach(b => {
+                            b.classList.remove('selected-A', 'selected-E', 'selected-N');
+                        });
+                        // Appliquer la nouvelle classe selon la valeur
+                        if (val === 'A') box.classList.add('selected-A');
+                        else if (val === 'E') box.classList.add('selected-E');
+                        else if (val === 'N') box.classList.add('selected-N');
+                        // Mettre à jour la valeur et l'attribut data-selected
+                        control.value = val;
+                        control.setAttribute('data-selected', val);
+                        // Lancer la sauvegarde différée
+                        debouncedSaveData();
+                    });
+                });
+            });
+        }
+
+        /**
+         * Applique visuellement une valeur préexistante à un conteneur de notation.
+         * Utilisé lors du chargement des données pour restaurer l'état sélectionné.
+         * @param {Element} control - le conteneur .notation-control
+         * @param {String} value - la valeur à appliquer ("A", "E", "N" ou vide)
+         */
+        function setNotationControlValue(control, value) {
+            if (!control) return;
+            const boxes = Array.from(control.querySelectorAll('.notation-box'));
+            // Réinitialiser les classes
+            boxes.forEach(b => {
+                b.classList.remove('selected-A', 'selected-E', 'selected-N');
+            });
+            if (value) {
+                const target = control.querySelector(`.notation-box[data-value="${value}"]`);
+                if (target) {
+                    if (value === 'A') target.classList.add('selected-A');
+                    else if (value === 'E') target.classList.add('selected-E');
+                    else if (value === 'N') target.classList.add('selected-N');
+                }
+            }
+            control.value = value || '';
+            control.setAttribute('data-selected', value || '');
         }
 
         // --- SIGNATURE PAD LOGIC ---
@@ -1015,6 +1153,6 @@
     </script>
 </body>
 <footer class="bg-blue-900 py-4 mt-10 text-center">
-    <img src="bourgogne.webp" alt="Logo Région" class="h-24 mx-auto">
+    <img src="bandeau.jpg" alt="Logo Région" class="h-24 mx-auto">
 </footer>
 </html>
